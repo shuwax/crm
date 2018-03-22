@@ -95,12 +95,11 @@
     /* ************TABLE**************** */
 
     table {
-        font-size: 2.2em;
+        font-size: 2.45em;
     }
 
     .firstTh {
         width: 7%;
-        font-size: 1.1em;
     }
 
     td {
@@ -124,7 +123,7 @@
     }
 
     .secondTable {
-        font-size: 2.5em
+        font-size: 2.6em;
     }
 
     /***********Last slide**************/
@@ -147,16 +146,20 @@
 
     .firstTr {
         height: 9vh;
-        font-size: 1.1em;
+        font-size: 1.2em;
     }
 
     .secondTr {
         height: 6.55vh;
-        font-size: 0.87em;
+        font-size: 0.9em;
     }
 
     .secondTh {
         font-size: 0.85em;
+    }
+
+    .firstThead {
+        font-size: 1.2em;
     }
 
 
@@ -237,7 +240,7 @@
     <section>
         @if(sizeof($userTable) != 0 || sizeof($reportTable) != 0)
             <table class="table inactive">
-                <thead>
+                <thead class="firstThead">
                 <tr>
                     <th class="firstTh">L.P</th>
                     <th>Imie &amp; Nazwisko</th>
