@@ -54,7 +54,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title" id="modal_title">Parametry kampani<span id="modal_category"></span></h4>
+                <h4 class="modal-title" id="modal_title">Parametry klientów<span id="modal_category"></span></h4>
             </div>
             <div class="modal-body">
 
@@ -279,11 +279,42 @@
                         </div>
                     </div>
                 </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Limity
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table id='limitsTable' class="table row-border">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-md-1">#</th>
+                                            <th>Zakres godzin</th>
+                                            <th class="col-md-2">Limit</th>
+                                            <th class="col-md-1">Usuń</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="addNewLimit" class="btn btn-default btn-block" type="button"><span class="glyphicon glyphicon-plus"></span>
+                                    Dodaj nowy limit
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
                             <label class="myLabel">Uwagi</label>
-                            <textarea class="form-control" name="clientComment" id="clientComment"></textarea>
+                            <textarea class="form-control" name="clientComment" id="clientComment" style="resize: vertical"></textarea>
                         </div>
                     </div>
                 </div>
@@ -319,7 +350,6 @@
 
         let editFlag = false;
         let saveButton = document.querySelector('#saveClient');
-        let modalTitle = document.querySelector('#modal_title');
         var saveCityButtonClicked = false;
 
         /**
@@ -341,38 +371,40 @@
             });
         }
 
-        function prepereModel(type) {
+        function prepareModal(type) {
+            let addNewLimit = $("#addNewLimit");
+            let saveClientModalButton = $('#ModalClient #saveClient');
             if (type == 'Edit') {
                 $('#ModalClient .modal-title').first().text('Edycja klienta');
-                let saveClientModalButton = $('#ModalClient #saveClient');
                 $("#ModalClient :input").prop("disabled", false);
                 saveClientModalButton.first().show();
                 saveClientModalButton.first().prop('class', 'btn btn-success form-control');
                 saveClientModalButton.first().text('');
                 saveClientModalButton.append($('<span class="glyphicon glyphicon-save"></span>'));
                 saveClientModalButton.append(' Zapisz Klienta');
+                addNewLimit.show();
             } else if (type == 'Show') {
                 $('#ModalClient .modal-title').first().text('Informacje o kliencie');
-                let saveClientModalButton = $('#ModalClient #saveClient');
                 $("#ModalClient :input").prop("disabled", true);
                 $("#closeModalBTN").prop("disabled", false);
+                $(".close").prop("disabled", false);
+                addNewLimit.hide();
 
                 saveClientModalButton.first().hide();
             } else if (type == 'Add') {
                 $('#ModalClient .modal-title').first().text('Nowy klient');
                 $("#ModalClient :input").prop("disabled", false);
-                let saveClientModalButton = $('#ModalClient #saveClient');
                 saveClientModalButton.first().show();
                 saveClientModalButton.first().prop('class', 'btn btn-success form-control');
                 saveClientModalButton.first().text('');
                 saveClientModalButton.append($('<span class="glyphicon glyphicon-save"></span>'));
                 saveClientModalButton.append(' Zapisz Klienta');
+                addNewLimit.show();
             }
         }
 
         //Pobranie informacji o kliencie i wstawienie go do modala
         function getInfoAboutClient(clientId) {
-            console.log(clientId);
             $.ajax({
                 type: "POST",
                 url: "{{ route('api.findClient') }}", // do zamiany
@@ -402,7 +434,6 @@
                     $('#clientComment').val(response.comment);
                     $('#ModalClient').modal('show');
                     editFlag = true;
-                    modalTitle.textContent = "Edytuj klienta";
                 }
             });
         }
@@ -424,6 +455,7 @@
             $('#clientPriority').val("0");
             $('#clientType').val("1");
             $('#clientID').val(0);
+            $('.limit').remove();
         }
 
         /**
@@ -545,7 +577,6 @@
                         else {
                             notify('<strong>Klient został pomyślnie edytowany</strong>', 'success');
                             editFlag = false;
-                            modalTitle.textContent = 'Dodaj nowego klienta';
                         }
                         $('#ModalClient').modal('hide');
                         saveButton.disabled = false; //after closing modal, enable button
@@ -555,10 +586,14 @@
         }
 
         $('#clientModal').click(() => {
-            prepereModel('Add');
+            prepareModal('Add');
         });
 
         $(document).ready(function () {
+            $('#addNewLimit').click(function () {
+                createLimitRow().appendTo($('#limitsTable tbody'));
+                reorganizeLimit();
+            });
 
             $('#giftTypeNameBTN').on('click', function () {
                 let newGistName = $('#NewGiftName').val();
@@ -956,19 +991,12 @@
                         })
                     });
 
-                    /**
-                     * This part is responsible for aplaying default heading to modal.
-                     */
-                    $("#ModalClient").on('hidden.bs.modal', function () {
-                        modalTitle.textContent = "Dodaj nowego klienta";
-                    });
-
 
                     /**
                      * Edycja clienta
                      */
                     $('.button-edit-client').on('click', function () {
-                        prepereModel('Edit');
+                        prepareModal('Edit');
                         clientId = $(this).data('id');
                         getInfoAboutClient(clientId);
                     });
@@ -976,7 +1004,7 @@
                      *  Wyświetlenie informacji o kliencie bez klawisza zapisz
                      */
                     $('.show-client').on('click', function () {
-                        prepereModel('Show');
+                        prepareModal('Show');
                         clientId = $(this).data('id');
                         getInfoAboutClient(clientId);
                     });
@@ -985,8 +1013,8 @@
                     {"data": "comment"},
                     {
                         "data": function (data, type, dataToSet) {
-                            return "<button class='btn btn-default show-client' data-id=" + data.id + "><span class='glyphicon glyphicon-search'></span></button>";
-                        }, "orderable": false, "searchable": false,
+                            return "<button class='btn btn-default btn-block show-client' data-id=" + data.id + "><span class='glyphicon glyphicon-search'></span></button>";
+                        }, "orderable": false, "searchable": false, width: '10%'
                     },
                     {
                         "data": function (data, type, dataToSet) {
@@ -1001,5 +1029,82 @@
                 ],
             });
         });
+
+        function createLimitRow(data = null) {
+            let lpSpanColumn = $(document.createElement('td')).addClass('limitNr').attr('scope','row');//.css('font-weight: bold');//.addClass('col-md-1')
+
+            let startingHourInput = $(document.createElement('input')).addClass('limitStartingInput form-control').attr('type','time').datetimepicker({
+                format: 'hh:ii',
+                minView: 0,
+                maxView: 1,
+                startView: 1
+            }).on('change',handleStartingHourInput);
+
+            let endingHourInput = $(document.createElement('input')).addClass('limitEndingInput form-control').attr('type','time').datetimepicker({
+                format: 'hh:ii',
+                minView: 0,
+                maxView: 1,
+                startView: 1
+            }).on('change',handleEndingHourInput);
+
+            let inputGroupSpan = $(document.createElement('div')).addClass('input-group-addon').text(':');
+            let inputGroup = $(document.createElement('div')).addClass('input-group').append(startingHourInput).append(inputGroupSpan).append(endingHourInput);
+            let hourRangeColumn = $(document.createElement('td')).append(inputGroup);//.addClass('col-md-4')
+
+            let limitInput = $(document.createElement('input')).addClass('form-control').attr('type','number').val(0).attr('min','0');
+            let limitColumn  = $(document.createElement('td')).append(limitInput);//.addClass('col-md-2')
+
+            let span = $(document.createElement('span')).addClass('glyphicon glyphicon-minus');
+            let removeLimitButton = $(document.createElement('button')).addClass('btn btn-danger btn-block').prop('type','button').append(span).click(removeLimitRow);
+            let removeLimitButtonColumn = $(document.createElement('td')).append(removeLimitButton);//.addClass('col-md-1')
+            return $(document.createElement('tr')).addClass('limit')//.css('margin-top','1em')
+                .append(lpSpanColumn)
+                .append(hourRangeColumn)
+                .append(limitColumn)
+                .append(removeLimitButtonColumn);
+        }
+
+        function reorganizeLimit(){
+            for(let i = 0; i < $('.limit').length; i++){
+                $($('.limitNr').get(i)).text((i+1)+'.');
+            }
+            let limitStringInputs = $('.limitStartingInput');
+            let limitEndingInputs = $('.limitEndingInput');
+            limitStringInputs.attr('disabled',false);
+            limitEndingInputs.attr('disabled',false);
+            $(limitStringInputs.get(0)).val('00:00').attr('disabled', true);
+            $(limitEndingInputs.get(limitEndingInputs.length-2)).val('');
+            $(limitEndingInputs.get(limitEndingInputs.length-1)).val('23:59').attr('disabled', true);
+
+
+        }
+
+        function handleStartingHourInput(){
+            let limitStringInputs = $('.limitStartingInput');
+            if(limitStringInputs.index($(this)) === 0){
+              $(this).val('00:00');
+            }
+        }
+
+        function handleEndingHourInput(){
+            let limitEndingInputs = $('.limitEndingInput');
+            if(limitEndingInputs.index($(this)) === limitEndingInputs.length -1){
+                $(this).val('23:59');
+            }
+        }
+        function removeLimitRow() {
+            swal({
+                title: 'Czy na pewno?',
+                text: "Wybrany zakres godzin limitów zostanie usunięty",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Tak, usuń!'
+            }).then((result) => {
+                if (result.value) {
+                    $(this).closest('.limit').remove();
+                    reorganizeLimit();
+                }
+            });
+        }
     </script>
 @endsection

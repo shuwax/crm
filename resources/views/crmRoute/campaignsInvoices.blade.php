@@ -322,55 +322,63 @@
                         $('.sendInvoice').click(function (e) {
                             let hotelId = $(e.target).data('client_id');
                             actualCampaignID =  $(e.target).data('campaign_id');
-                            getHotelInfoAjax(hotelId).then(function (data) {
-                                let modalContent = $('#' + modalIdString + ' .modal-content');
-                                setModalSize(modalIdString, 3);
-                                clearModalContent(modalContent);
+                            swal({
+                                title: 'Ładowawnie...',
+                                text: 'To może chwilę zająć',
+                                allowOutsideClick: false,
+                                allowEscapeKey: false,
+                                allowEnterKey: false,
+                                onOpen: () => {
+                                    swal.showLoading();
+                                    getHotelInfoAjax(hotelId, function (data) {
+                                        let modalContent = $('#' + modalIdString + ' .modal-content');
+                                        setModalSize(modalIdString, 3);
+                                        clearModalContent(modalContent);
 
-                                //--------- create modal content -------------//
-                                //--------- modal header ------------//
-                                let modalTitle = $(document.createElement('h4')).addClass('modal-titlel').text('Wysyłanie faktury mailem do hotelu');
-                                let modalHeader = $(document.createElement('div')).addClass('modal-header').append(modalTitle);
-                                //--------- modal body ------------------//
-                                let labelSpan = $(document.createElement('span')).addClass('input-group-addon').text('Do');
-                                let contactsSelect = $(document.createElement('select')).addClass('selectpicker form-control').attr('id','emailSelect').prop('multiple', true).prop('title','Wybierz adresy mailowe');
-                                let inputGroup = $(document.createElement('div')).addClass('input-group').append(labelSpan).append(contactsSelect);
-                                let contactsColumn = $(document.createElement('div')).addClass('col-md-12').append(inputGroup);
-                                let row2 = $(document.createElement('div')).addClass('row').append(contactsColumn);
+                                        //--------- create modal content -------------//
+                                        //--------- modal header ------------//
+                                        let modalTitle = $(document.createElement('h4')).addClass('modal-titlel').text('Wysyłanie faktury mailem do klienta');
+                                        let modalHeader = $(document.createElement('div')).addClass('modal-header').append(modalTitle);
+                                        //--------- modal body ------------------//
+                                        let labelSpan = $(document.createElement('span')).addClass('input-group-addon').text('Do');
+                                        let contactsSelect = $(document.createElement('select')).addClass('selectpicker form-control').attr('id','emailSelect').prop('multiple', true).prop('title','Wybierz adresy mailowe');
+                                        let inputGroup = $(document.createElement('div')).addClass('input-group').append(labelSpan).append(contactsSelect);
+                                        let contactsColumn = $(document.createElement('div')).addClass('col-md-12').append(inputGroup);
+                                        let row2 = $(document.createElement('div')).addClass('row').append(contactsColumn);
 
-                                let sendSpan = $(document.createElement('span')).addClass('glyphicon glyphicon-envelope');
-                                let sendButton = $(document.createElement('button')).addClass('btn btn-block btn-info')
-                                    .click(function () {
-                                        handleSendInvoiceButtonClick(e);
-                                    })
-                                    .prop('type', 'button').text(' Wyślij fakturę').prepend(sendSpan);
-                                let sendColumn = $(document.createElement('div')).addClass('col-md-12').append(sendButton);
-                                let buttonRow = $(document.createElement('div')).addClass('row').append(sendColumn).css('margin-top', '1em');
+                                        let sendSpan = $(document.createElement('span')).addClass('glyphicon glyphicon-envelope');
+                                        let sendButton = $(document.createElement('button')).addClass('btn btn-block btn-info')
+                                            .click(function () {
+                                                handleSendInvoiceButtonClick(e);
+                                            })
+                                            .prop('type', 'button').text(' Wyślij fakturę').prepend(sendSpan);
+                                        let sendColumn = $(document.createElement('div')).addClass('col-md-12').append(sendButton);
+                                        let buttonRow = $(document.createElement('div')).addClass('row').append(sendColumn).css('margin-top', '1em');
 
-                                if((data.payment_mail  == null || data.payment_mail == '') && (data.manager_mail  == null || data.manager_mail == '')){
-                                    let option = $(document.createElement('option')).val('0').text('Brak adresu email').prop('disabled',true);
-                                    contactsSelect.append(option);
-                                    contactsSelect.selectpicker('refresh');
-                                    sendButton.prop('disabled',true);
-                                }else{
-                                    if(!(data.payment_mail  == null || data.payment_mail == '')) {
-                                        let option = $(document.createElement('option')).val(data.payment_mail).text(data.payment_mail);
-                                        option.attr('data-subtext', 'Mail płatności');
-                                        contactsSelect.append(option);
-                                        contactsSelect.val(1);
-                                    }
-                                    if(!(data.payment_mail  == null || data.payment_mail == '')) {
-                                        let option = $(document.createElement('option')).val(data.manager_mail).text(data.manager_mail);
-                                        option.attr('data-subtext', 'Mail szefa');
-                                        contactsSelect.append(option);
-                                    }
-                                    contactsSelect.selectpicker('refresh');
-                                }
+                                        if((data.payment_mail  == null || data.payment_mail == '') && (data.manager_mail  == null || data.manager_mail == '')){
+                                            let option = $(document.createElement('option')).val('0').text('Brak adresu email').prop('disabled',true);
+                                            contactsSelect.append(option);
+                                            contactsSelect.selectpicker('refresh');
+                                            sendButton.prop('disabled',true);
+                                        }else{
+                                            if(!(data.payment_mail  == null || data.payment_mail == '')) {
+                                                let option = $(document.createElement('option')).val(data.payment_mail).text(data.payment_mail);
+                                                option.attr('data-subtext', 'Mail płatności');
+                                                contactsSelect.append(option);
+                                                contactsSelect.val(data.payment_mail);
+                                            }
+                                            if(!(data.payment_mail  == null || data.payment_mail == '')) {
+                                                let option = $(document.createElement('option')).val(data.manager_mail).text(data.manager_mail);
+                                                option.attr('data-subtext', 'Mail szefa');
+                                                contactsSelect.append(option);
+                                            }
+                                            contactsSelect.selectpicker('refresh');
+                                        }
 
 
-                                let messageTitleInput = $(document.createElement('input')).attr('id','messageTitleInput').addClass('form-control').attr('type','text').attr('placeholder','Tytuł wiadomości');
-                                let messageTitleColumn = $(document.createElement('div')).addClass('col-md-6').append(messageTitleInput);
-                                let row3 = $(document.createElement('div')).addClass('row').append(messageTitleColumn).css('margin-top','1em');
+                                        let messageTitleInput = $(document.createElement('input')).attr('id','messageTitleInput').addClass('form-control').attr('type','text').attr('placeholder','Tytuł wiadomości');
+                                        let messageTitleColumn = $(document.createElement('div')).addClass('col-md-6').append(messageTitleInput);
+                                        let row3 = $(document.createElement('div')).addClass('row').append(messageTitleColumn).css('margin-top','1em');
 
                                 let messageInput = $(document.createElement('textarea')).attr('id','messageTitlemailSelecteInput').addClass('form-control').attr('placeholder','Treść wiadomości')
                                     .css({
@@ -380,17 +388,21 @@
                                 let messageColumn = $(document.createElement('div')).addClass('col-md-12').append(messageInput);
                                 let row4 = $(document.createElement('div')).addClass('row').append(messageColumn).css('margin-top','1em');
 
-                                let inovoiceColumn = $(document.createElement('div')).addClass('col-md-12').text('');
-                                let row5 = $(document.createElement('div')).addClass('row').append(inovoiceColumn).css('margin-top','1em');
+                                        let inovoiceColumn = $(document.createElement('div')).addClass('col-md-12').text('');
+                                        let row5 = $(document.createElement('div')).addClass('row').append(inovoiceColumn).css('margin-top','1em');
 
-                                let modalBody = $(document.createElement('div')).addClass('modal-body')
-                                    .append(getCampaignInfoRow(e))
-                                    .append(row2).append(row3).append(row4).append(row5)
-                                    .append(buttonRow);
-                                modalContent.prepend(modalBody).prepend(modalHeader);
-                                //--------- end creating modal content -------------//
+                                        let modalBody = $(document.createElement('div')).addClass('modal-body')
+                                            .append(getCampaignInfoRow(e))
+                                            .append(row2).append(row3).append(row4).append(row5)
+                                            .append(buttonRow);
+                                        modalContent.prepend(modalBody).prepend(modalHeader);
+                                        //--------- end creating modal content -------------//
 
-                                myModal.modal('show');
+                                        myModal.modal('show');
+                                    }).then(function () {
+                                        swal.close();
+                                    });
+                                }
                             });
                         });
 
@@ -667,7 +679,7 @@
             });
         }
 
-        function getHotelInfoAjax(clientId){
+        function getHotelInfoAjax(clientId, callback){
             return $.ajax({
                 type: "POST",
                 url: "{{route('api.getClientInfoAjax')}}",
@@ -678,7 +690,7 @@
                     clientId: clientId
                 }
             }).done((response)=>{
-                return response;
+                callback(response);
             }).error(function (jqXHR, textStatus, thrownError) {
                 swal.close();
                 console.log(jqXHR);
