@@ -10,8 +10,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet"/>
     <link href="{{ asset('/css/fixedColumns.dataTables.min.css')}}" rel="stylesheet">
     <link href="{{asset('/css/fixedHeader.dataTables.min.css')}}" rel="stylesheet">
-
-
 @endsection
 @section('content')
 
@@ -61,6 +59,17 @@
         .alert-info {
             font-size: 1.2em;
         }
+         .limitSection, .limitInput, .separate {
+             margin-top: 2%
+         }
+        .separate{
+            margin-bottom: 14px
+        }
+        .dropdown-menu{
+            left: 0%;
+        }
+
+
     </style>
 
     {{--Header page --}}
@@ -85,7 +94,7 @@
                 </div>
                 <div class="panel-body">
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label for="date" class="myLabel">Data początkowa:</label>
                                 <div class="input-group date form_date col-md-5" data-date=""
@@ -96,8 +105,7 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="col-md-3">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label for="date_stop" class="myLabel">Data końcowa:</label>
                                 <div class="input-group date form_date col-md-5" data-date=""
@@ -108,12 +116,153 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 buttonSection">
-
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <button class="btn btn-default simulationClientLimit"  data-toggle="modal" data-target="#modalSimulationClient" >Symulacja Klienta(Edycja Limitów)</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <button class="btn btn-default simulationNewClient"  data-toggle="modal"  data-target="#modalSimulationClient" >Symulacja Klienta(Nowy Klient)</button>
+                            </div>
                         </div>
                     </div>
+
+
+                    <div id="modalSimulationClient" class="modal fade" role="dialog">
+                        <div class="modal-dialog modal-lg" style="width: 90%">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title" id="modal_title">Sekcja symulatcji<span id="modal_category"></span></h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            Symalacja limitów klienta
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="col-md-12 ">
+                                                <div class="changeClientLimit" style="margin-bottom: 1%">
+                                                    <div class="col-md-6">
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon">Wybierz klienta</span>
+                                                            <select class="form-control selectedClientToChangeLimit selectpicker" title="Wybierz klientów..."
+                                                                    data-live-search=”true” data-width="100%" multiple="multiple"
+                                                            >
+                                                                <option>1</option>
+                                                                <option>2</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon">Wybierz datę zmiany limitów</span>
+                                                            <input  class="form-control dateStartClientToChangeLimit" name="dateStartClientToChangeLimit">
+                                                        </div>
+                                                    </div>
+                                                    <div class="limitSection">
+                                                        <div class="col-md-4">
+                                                            <label for="exampleInputEmail1">Limit dla pokazów pełnych (3)</label>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #1</span>
+                                                                <input class="form-control AllFirstLimit" name="AllFirstLimit">
+                                                            </div>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #2</span>
+                                                                <input class="form-control AllSecondLimit" name="AllSecondLimit">
+                                                            </div>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #3</span>
+                                                                <input class="form-control AllThirdLimit" name="AllThirdLimit">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label for="exampleInputEmail1">Limit dla pokazów godzinowych</label>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #1</span>
+                                                                <input class="form-control OnlyFirstLimit" name="OnlyFirstLimit">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <button class="btn btn-default separate" class="AddNewSimulation">
+                                                                <span class="glyphicon glyphicon-plus"></span> <span>Dodaj Kolejną symulacje</span>
+                                                            </button>
+                                                            <button class="btn btn-danger separate" class="RemoveSimulation">
+                                                                <span class="glyphicon glyphicon-minus"></span> <span>Usuń Symulację</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-md-12" style="border-bottom: 2px;background: black;">
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="changeClientLimit" style="margin-bottom: 1%">
+                                                    <div class="col-md-6">
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon">Wybierz klienta</span>
+                                                            <select class="form-control selectedClientToChangeLimit">
+                                                                <option>1</option>
+                                                                <option>2</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon">Wybierz datę zmiany limitów</span>
+                                                            <input  class="form-control dateStartClientToChangeLimit" name="dateStartClientToChangeLimit">
+                                                        </div>
+                                                    </div>
+                                                    <div class="limitSection">
+                                                        <div class="col-md-4">
+                                                            <label for="exampleInputEmail1">Limit dla pokazów pełnych (3)</label>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #1</span>
+                                                                <input class="form-control AllFirstLimit" name="AllFirstLimit">
+                                                            </div>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #2</span>
+                                                                <input class="form-control AllSecondLimit" name="AllSecondLimit">
+                                                            </div>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #3</span>
+                                                                <input class="form-control AllThirdLimit" name="AllThirdLimit">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label for="exampleInputEmail1">Limit dla pokazów godzinowych</label>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #1</span>
+                                                                <input class="form-control OnlyFirstLimit" name="OnlyFirstLimit">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <button class="btn btn-default separate" class="AddNewSimulation">
+                                                                <span class="glyphicon glyphicon-plus"></span> <span>Dodaj Kolejną symulacje</span>
+                                                            </button>
+
+                                                            <button class="btn btn-danger separate" class="RemoveSimulation">
+                                                                <span class="glyphicon glyphicon-minus"></span> <span>Usuń Symulację</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <table id="datatable" class="table table-striped row-border" style="width:100%;">
                         <thead>
                         <tr>
@@ -125,42 +274,9 @@
                             @endforeach
                             <th>Suma</th>
                             <th>Podział</th>
-                            {{--@foreach($departmentInfo as $item)--}}
-                            {{--<th>CEL {{$item->name2.' '.$item->name}}</th>--}}
-                            {{--@endforeach--}}
                         </tr>
                         </thead>
                         <tbody>
-                        {{--@foreach($departmentInfo as $item)--}}
-                        {{--<tr>--}}
-                        {{--<td>1</td>--}}
-                        {{--<td>2</td>--}}
-                        {{--<td>3</td>--}}
-                        {{--@foreach($departmentInfo as $item)--}}
-                        {{--<td>1123123123123123</td>--}}
-                        {{--@endforeach--}}
-                        {{--<td>5</td>--}}
-                        {{--<td>6</td>--}}
-                        {{--@foreach($departmentInfo as $item)--}}
-                        {{--<td>1123123123123123</td>--}}
-                        {{--@endforeach--}}
-                        {{--</tr>--}}
-                        {{--@endforeach--}}
-                        {{--@foreach($departmentInfo as $item)--}}
-                        {{--<tr>--}}
-                        {{--<td>1</td>--}}
-                        {{--<td>2</td>--}}
-                        {{--<td>3</td>--}}
-                        {{--@foreach($departmentInfo as $item)--}}
-                        {{--<td>1123123123123123</td>--}}
-                        {{--@endforeach--}}
-                        {{--<td>5</td>--}}
-                        {{--<td>6</td>--}}
-                        {{--@foreach($departmentInfo as $item)--}}
-                        {{--<td>1123123123123123</td>--}}
-                        {{--@endforeach--}}
-                        {{--</tr>--}}
-                        {{--@endforeach--}}
                         </tbody>
                     </table>
                     <div class="row">
@@ -189,6 +305,11 @@
                     pickTime: false,
                 });
             })();
+
+            $('.selectpicker').selectpicker({
+                style: 'btn-info',
+                size: 4
+            });
 
 
             /********** GLOBAL VARIABLES ***********/
