@@ -15,74 +15,64 @@
     </style>
     @endsection
 @section('content')
-<div class="row">
-    <div class="col-md-12">
-        <div class="page-header">
-            <div class="alert gray-nav ">Godziny / Podgląd godzin</div>
-        </div>
+<div class="page-header">
+    <div class="alert gray-nav ">Godziny / Podgląd godzin</div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Zakres wyszukiwania:
     </div>
-<div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-lg-12">
+                <div id="start_stop">
+                    <div class="panel-body">
+                        <form class="form-horizontal" method="post" action="view_hour" id="my_form">
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                <div class="form-group">
+                                    <label for ="ipadress">Pracownik:</label>
+                                    <select class="form-control" name="userid" id="userid">
+                                        @if(isset($response_userid))
+                                            <option value="-1">Wybierz</option>
+                                            @foreach ($users as $user)
+                                                @if($response_userid == $user->id)
+                                                    <option  selected value={{$user->id}} >{{ $user->last_name. ' '.$user->first_name}}</option>
+                                                @else
+                                                    <option value={{$user->id}}>{{ $user->last_name. ' '.$user->first_name}}</option>
+                                                @endif
+                                             @endforeach
+                                        @else
+                                        <option selected value="-1">Wybierz</option>
+                                            @foreach ($users as $user)
+                                                <option value={{$user->id}}>{{ $user->last_name. ' '.$user->first_name}}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
 
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    Zakres wyszukiwania:
-                </div>
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div id="start_stop">
-                                <div class="panel-body">
-                                    <form class="form-horizontal" method="post" action="view_hour" id="my_form">
-                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                            <div class="form-group">
-                                                <label for ="ipadress">Pracownik:</label>
-                                                <select class="form-control" name="userid" id="userid">
-                                                    @if(isset($response_userid))
-                                                        <option value="-1">Wybierz</option>
-                                                        @foreach ($users as $user)
-                                                            @if($response_userid == $user->id)
-                                                                <option  selected value={{$user->id}} >{{ $user->last_name. ' '.$user->first_name}}</option>
-                                                            @else
-                                                                <option value={{$user->id}}>{{ $user->last_name. ' '.$user->first_name}}</option>
-                                                            @endif
-                                                         @endforeach
-                                                    @else
-                                                    <option selected value="-1">Wybierz</option>
-                                                        @foreach ($users as $user)
-                                                            <option value={{$user->id}}>{{ $user->last_name. ' '.$user->first_name}}</option>
-                                                        @endforeach
-                                                    @endif
-                                                </select>
+                                    <label for ="ipadress">Miesiąc:</label>
+                                    <select class="form-control" name="month">
+                                        @for ($i = 0; $i < 3; $i++)
+                                            {{$date = date("Y-m",mktime(0,0,0,date("m")-$i,1,date("Y")))}}
+                                            @if(isset($response_month))
+                                                @if($response_month == $date)
+                                                    <option selected>{{$date}}</option>
+                                                @else
+                                                    <option>{{$date}}</option>
+                                                @endif
+                                            @else
+                                                    <option>{{$date}}</option>
+                                            @endif
+                                        @endfor
 
-                                                <label for ="ipadress">Miesiąc:</label>
-                                                <select class="form-control" name="month">
-                                                    @for ($i = 0; $i < 3; $i++)
-                                                        {{$date = date("Y-m",mktime(0,0,0,date("m")-$i,1,date("Y")))}}
-                                                        @if(isset($response_month))
-                                                            @if($response_month == $date)
-                                                                <option selected>{{$date}}</option>
-                                                            @else
-                                                                <option>{{$date}}</option>
-                                                            @endif
-                                                        @else
-                                                                <option>{{$date}}</option>
-                                                        @endif
-                                                    @endfor
+                                    </select>
 
-                                                </select>
-
-                                            </div>
-                                            <div class="form-group">
-                                                    <button id="form_submit" disabled class="btn btn-primary" name="submit" type="submit" style="width: 100%">
-                                                        Generuj
-                                                    </button>
-                                            </div>
-                                    </form>
                                 </div>
-                            </div>
-                        </div>
+                                <div class="form-group">
+                                        <button id="form_submit" disabled class="btn btn-primary" name="submit" type="submit" style="width: 100%">
+                                            Generuj
+                                        </button>
+                                </div>
+                        </form>
                     </div>
                 </div>
             </div>

@@ -1,12 +1,8 @@
 @extends('layouts.main')
 @section('content')
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="page-header">
-                <div class="well gray-nav">Tabela postępów Kierownik</div>
-            </div>
-        </div>
+    <div class="page-header">
+        <div class="well gray-nav">Tabela postępów Kierownik</div>
     </div>
 
     <button data-toggle="modal" class="btn btn-default training_to_modal" id="new_coaching_modal" data-target="#Modal_Coaching" data-id="1" title="Nowy Coaching" style="margin-bottom: 14px">
@@ -32,65 +28,63 @@
         </div>
     </div>
     {{--Tabela z coaching w toku--}}
-    <div class="row">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                W toku
-            </div>
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="myLabel">Typ coaching'u:</label>
-                            <select class="form-control" id="type_coaching_in_progress">
-                                <option value="0">Wszystkie</option>
-                                <option value="1">Średnia</option>
-                                <option value="2">Jakość</option>
-                                <option value="3">RBH</option>
-                            </select>
-                        </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            W toku
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="myLabel">Typ coaching'u:</label>
+                        <select class="form-control" id="type_coaching_in_progress">
+                            <option value="0">Wszystkie</option>
+                            <option value="1">Średnia</option>
+                            <option value="2">Jakość</option>
+                            <option value="3">RBH</option>
+                        </select>
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="myLabel">Zakres od:</label>
-                            <div class="input-group date form_date col-md-5" data-date="" data-date-format="yyyy-mm-dd" data-link-field="datak" style="width:100%;">
-                                <input class="form-control" id="date_start_in_progress" name="date_start_in_progress" type="text" value="{{date('Y-m-01')}}" >
-                                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="myLabel">Zakres do:</label>
-                            <div class="input-group date form_date col-md-5" data-date="" data-date-format="yyyy-mm-dd" data-link-field="datak" style="width:100%;">
-                                <input class="form-control" id="date_stop_in_progress" name="date_stop_in_progress" type="text" value="{{date('Y-m-d')}}" >
-                                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                            </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="myLabel">Zakres od:</label>
+                        <div class="input-group date form_date col-md-5" data-date="" data-date-format="yyyy-mm-dd" data-link-field="datak" style="width:100%;">
+                            <input class="form-control" id="date_start_in_progress" name="date_start_in_progress" type="text" value="{{date('Y-m-01')}}" >
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="table-responsive">
-                            <table id="table_in_progress" class="table table-striped thead-inverse">
-                                <thead>
-                                <tr>
-                                    <th>Kierownik</th>
-                                    <th>Trener</th>
-                                    <th>Data</th>
-                                    <th>Temat</th>
-                                    <th>Typ coachingu</th>
-                                    <th>Wynik wyjściowy</th>
-                                    <th>Wynik Aktualny</th>
-                                    <th>Cel</th>
-                                    <th>Aktualne RBH</th>
-                                    <th>Akcja</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="myLabel">Zakres do:</label>
+                        <div class="input-group date form_date col-md-5" data-date="" data-date-format="yyyy-mm-dd" data-link-field="datak" style="width:100%;">
+                            <input class="form-control" id="date_stop_in_progress" name="date_stop_in_progress" type="text" value="{{date('Y-m-d')}}" >
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="table-responsive">
+                        <table id="table_in_progress" class="table table-striped thead-inverse">
+                            <thead>
+                            <tr>
+                                <th>Kierownik</th>
+                                <th>Trener</th>
+                                <th>Data</th>
+                                <th>Temat</th>
+                                <th>Typ coachingu</th>
+                                <th>Wynik wyjściowy</th>
+                                <th>Wynik Aktualny</th>
+                                <th>Cel</th>
+                                <th>Aktualne RBH</th>
+                                <th>Akcja</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -100,7 +94,6 @@
 
 
     {{--Tabela z coaching w Nierozliczone--}}
-    <div class="row">
         <div class="panel panel-default">
             <div class="panel-heading">
                 Nierozliczone
@@ -138,6 +131,7 @@
                             </div>
                         </div>
                     </div>
+                </div>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="table-responsive">
@@ -163,13 +157,11 @@
                             </div>
                         </div>
                     </div>
-                </div>
             </div>
         </div>
 
 
         {{--Tabela z coaching w Rozliczone--}}
-        <div class="row">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     Rozliczone
@@ -233,7 +225,6 @@
                     </div>
                 </div>
             </div>
-        </div>
 
 
 
@@ -790,8 +781,8 @@
                                 },"name": "actual_rbh","searchable": false
                             },
                             {"data":function (data, type, dataToSet) {
-                                    return "<button class='button-edit-coaching btn btn-warning' style='margin: 3px;' data-id="+data.id+">Edycja</button>" +
-                                        "<button class='button-delete-coaching btn btn-danger' data-id="+data.id+">Usuń</button>";
+                                    return "<button class='button-edit-coaching btn btn-warning btn-block' data-id="+data.id+">Edycja</button>" +
+                                        "<button class='button-delete-coaching btn btn-danger btn-block' data-id="+data.id+">Usuń</button>";
                                 },"orderable": false, "searchable": false
                             },
                         ],
@@ -1022,7 +1013,7 @@
                                 },"name": "comment"
                             },
                             {"data":function (data, type, dataToSet) {
-                                    return "<button class='btn-accept_coaching btn btn-success' data-id="+data.id+" >Akceptuj</button>";
+                                    return "<button class='btn-accept_coaching btn btn-success btn-block' data-id="+data.id+" >Akceptuj</button>";
                                 },"orderable": false, "searchable": false
                             },
                         ],

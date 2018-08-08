@@ -1,50 +1,41 @@
 @extends('layouts.main')
 @section('content')
-<div class="row">
-    <div class="col-md-12">
-        <div class="page-header">
-            <div class="alert gray-nav ">Godziny / Lista obecności</div>
-        </div>
+<div class="page-header">
+    <div class="alert gray-nav ">Godziny / Lista obecności</div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Zakres wyszukiwania:
     </div>
-<div>
-
-<div class="row">
-    <div class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                Zakres wyszukiwania:
-            </div>
-            <div class="panel-body">
-                    <form method="POST" action="{{URL::to('/timesheet/')}}">
-                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <div class="input-group date form_date col-md-5" data-date="" data-date-format="yyyy-mm-dd" data-link-field="datak" style="width:100%;">
-                                    <input class="form-control" name="timesheet_date_start" id="timesheet_date_start" type="text" value="@if(isset($date_start)){{$date_start}}
-                                    @else{{date('Y-m-d')}}
-                                    @endif
-                                    " readonly>
-                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span></div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <div class="input-group date form_date col-md-5" data-date="" data-date-format="yyyy-mm-dd" data-link-field="datak" style="width:100%;">
-                                    <input class="form-control" name="timesheet_date_stop" id="timesheet_date_stop" type="text" value="@if(isset($date_stop)){{$date_stop}}
-                                    @else{{date('Y-m-d')}}
-                                    @endif
-                                    " readonly>
-                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span></div>
-                                </div>
-                            </div>
-                        </div>
+    <div class="panel-body">
+            <form method="POST" action="{{URL::to('/timesheet/')}}">
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                <div class="row">
+                    <div class="col-md-6">
                         <div class="form-group">
-                            <button class="btn btn-info btn-lg" id="date_selected">Pokaż listę obecności</button>
+                            <div class="input-group date form_date col-md-5" data-date="" data-date-format="yyyy-mm-dd" data-link-field="datak" style="width:100%;">
+                            <input class="form-control" name="timesheet_date_start" id="timesheet_date_start" type="text" value="@if(isset($date_start)){{$date_start}}
+                            @else{{date('Y-m-d')}}
+                            @endif
+                            " readonly>
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span></div>
                         </div>
-                    </form>
-            </div>
-        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="input-group date form_date col-md-5" data-date="" data-date-format="yyyy-mm-dd" data-link-field="datak" style="width:100%;">
+                            <input class="form-control" name="timesheet_date_stop" id="timesheet_date_stop" type="text" value="@if(isset($date_stop)){{$date_stop}}
+                            @else{{date('Y-m-d')}}
+                            @endif
+                            " readonly>
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-info btn-lg" id="date_selected">Pokaż listę obecności</button>
+                </div>
+            </form>
     </div>
 </div>
 

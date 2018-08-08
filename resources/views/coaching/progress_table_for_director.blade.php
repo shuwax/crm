@@ -1,13 +1,8 @@
 @extends('layouts.main')
 @section('content')
 
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="page-header">
-                <div class="well gray-nav">Tabela postępów Dyrektor</div>
-            </div>
-        </div>
+    <div class="page-header">
+        <div class="well gray-nav">Tabela postępów Dyrektor</div>
     </div>
 
     <button data-toggle="modal" class="btn btn-default training_to_modal" id="new_coaching_modal" data-target="#Modal_Coaching" data-id="1" title="Nowy Coaching" style="margin-bottom: 14px">
@@ -33,7 +28,6 @@
         </div>
     </div>
     {{--Tabela z coaching w toku--}}
-    <div class="row">
         <div class="panel panel-default">
             <div class="panel-heading">
                 W toku
@@ -96,12 +90,10 @@
                 </div>
             </div>
         </div>
-    </div>
 
 
 
     {{--Tabela z coaching w Nierozliczone--}}
-    <div class="row">
         <div class="panel panel-default">
             <div class="panel-heading">
                 Nierozliczone
@@ -139,6 +131,7 @@
                         </div>
                     </div>
                 </div>
+                </div>
                 <div class="row">
                     <div class="col-md-12">
                         <div class="table-responsive">
@@ -166,11 +159,9 @@
                 </div>
             </div>
         </div>
-    </div>
 
 
     {{--Tabela z coaching w Rozliczone--}}
-    <div class="row">
         <div class="panel panel-default">
             <div class="panel-heading">
                 Rozliczone
@@ -237,7 +228,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
 
 
@@ -782,8 +772,8 @@
                             },"name": "actual_rbh","searchable": false
                         },
                         {"data":function (data, type, dataToSet) {
-                                return "<button class='button-edit-coaching btn btn-warning' style='margin: 3px;' data-id="+data.id+">Edycja</button>" +
-                                    "<button class='button-delete-coaching btn btn-danger' data-id="+data.id+">Usuń</button>";
+                                return "<button class='button-edit-coaching btn btn-warning btn-block' data-id="+data.id+">Edycja</button>" +
+                                    "<button class='button-delete-coaching btn btn-danger btn-block' data-id="+data.id+">Usuń</button>";
                             },"orderable": false, "searchable": false
                         },
                     ],
@@ -968,7 +958,7 @@
                         },"name": "comment"
                     },
                     {"data":function (data, type, dataToSet) {
-                            return "<button class='btn-accept_coaching btn btn-success' data-id="+data.id+" >Akceptuj</button>";
+                            return "<button class='btn-accept_coaching btn btn-success btn-block' data-id="+data.id+" >Akceptuj</button>";
                         },"orderable": false, "searchable": false
                     },
                 ],
@@ -1069,7 +1059,7 @@
                     {
                         "data": function (data, type, set) {
 
-                            return '<button class="btn btn-info" type="submit" id="revertbtn_' +
+                            return '<button class="btn btn-info btn-block" type="submit" id="revertbtn_' +
                                 data.id +
                                 '" name="settlement_id" value="' +
                                 data.id +

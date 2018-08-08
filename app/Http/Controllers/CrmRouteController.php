@@ -2716,7 +2716,8 @@ class CrmRouteController extends Controller
             $allInfoCollect->push($dayCollect);
             $actualDate = date('Y-m-d', strtotime($actualDate. ' + 1 days'));
         }
-        return datatables($allInfoCollect)->make(true);
+
+        return $allInfoCollect;
     }
 
     public function getNameOfWeek($date){

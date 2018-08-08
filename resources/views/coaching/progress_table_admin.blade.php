@@ -1,13 +1,8 @@
 @extends('layouts.main')
 @section('content')
 
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="page-header">
-                <div class="well gray-nav">Tabela postępów Zbiorczy</div>
-            </div>
-        </div>
+    <div class="page-header">
+        <div class="well gray-nav">Tabela postępów Zbiorczy</div>
     </div>
 
     <div class="panel panel-default">
@@ -121,7 +116,6 @@
     </div>
 
     {{--Tabela z coaching w toku--}}
-    <div class="row">
         <div class="panel panel-default">
             <div class="panel-heading">
                 W toku
@@ -153,12 +147,10 @@
                 </div>
             </div>
         </div>
-    </div>
 
 
 
     {{--Tabela z coaching w Nierozliczone--}}
-    <div class="row">
         <div class="panel panel-default">
             <div class="panel-heading">
                 Nierozliczone
@@ -190,11 +182,9 @@
                 </div>
             </div>
         </div>
-    </div>
 
 
     {{--Tabela z coaching w Rozliczone--}}
-    <div class="row">
         <div class="panel panel-default">
             <div class="panel-heading">
                 Rozliczone
@@ -227,7 +217,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
 @endsection
 

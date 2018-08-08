@@ -328,57 +328,98 @@
             $('#date_start').val(firstDayOfThisMonth);
 
             /*********************DataTable FUNCTUONS****************************/
-
-            let table = $('#datatable').DataTable({
-                serverSide: true,
-                scrollY: '60vh',
-                scrollX: true,
-                scrollCollapse: true,
-                paging: false,
-                fixedColumns: {
-                    leftColumns: 3
-                },
-                "ajax": {
-                    'url': "{{ route('api.getaHeadPlanningInfo') }}",
-                    'type': 'POST',
-                    'data': function (d) {
-                        d.startDate = $('#date_start').val();
-                        d.stopDate = $("#date_stop").val();
-                    },
-                    'headers': {'X-CSRF-TOKEN': '{{ csrf_token() }}'}
-                },
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Polish.json"
-                }, fnDrawCallback: function () {
-                    elementsToSum.firstElement.tdId = null;
-                    elementsToSum.firstElement.trId = null;
-                    elementsToSum.lastElement.tdId = null;
-                    elementsToSum.lastElement.trId = null;
-                    const allTd = document.querySelectorAll('td');
-                    allTd.forEach(cell => {
-                        if(cell.textContent == '0') {
-                            cell.style.background = "#b9f4b7";
+            let aheadPlanningData = {
+                limitSimulation: null,
+                newClientSimulation: null,
+                getData: function (startDate, stopDate) {
+                    let deffered = $.Deferred();
+                    $.ajax({
+                        url: "{{ route('api.getaHeadPlanningInfo') }}",
+                        type: 'POST',
+                        headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                        data: {
+                            startDate: startDate,
+                            stopDate: stopDate,
+                            limitSimulation: this.limitSimulation,
+                            newClientSimulation: this.newClientSimulation
+                        },
+                        success: function (response) {
+                            deffered.resolve(response);
+                        },
+                        function (jqXHR, textStatus, thrownError) {
+                            console.log(jqXHR);
+                            console.log('textStatus: ' + textStatus);
+                            console.log('hrownError: ' + thrownError);
+                            swal({
+                                type: 'error',
+                                title: 'Błąd ' + jqXHR.status,
+                                text: 'Wystąpił błąd: ' + thrownError+' "'+jqXHR.responseJSON.message+'"',
+                            });
+                            $('#saveHotel').prop('disabled', false);
+                            deffered.reject();
                         }
-                    })
-                }, "columns": [
-                    {"data": "numberOfWeek"},
-                    {"data": "dayName"},
-                    {"data": "day"},
-                        @foreach($departmentInfo as $item)
-                    {
-                        "data": `{{$item->name2}}`, "searchable": false
-                    },
-                        @endforeach
-                    {
-                        "data": "totalScore"
-                    },
-                    {
-                        "data": function (data, type, dataToSet) {
-                            return data.allSet
-                        }, "name": "allSet"
-                    }
-                ]
+                    });
+                    return deffered.promise();
+                }
+            };
+
+            aheadPlanningData.getData($('#date_start').val(),$("#date_stop").val()).done(function (response) {
+                aheadPlaningTable.setTableData(response);
             });
+
+            let aheadPlaningTable = {
+                dataTable:  $('#datatable').DataTable({
+                    //serverSide: true,
+                    scrollY: '60vh',
+                    scrollX: true,
+                    scrollCollapse: true,
+                    paging: false,
+                    fixedColumns: {
+                        leftColumns: 3
+                    },
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Polish.json"
+                    }, fnDrawCallback: function () {
+                        elementsToSum.firstElement.tdId = null;
+                        elementsToSum.firstElement.trId = null;
+                        elementsToSum.lastElement.tdId = null;
+                        elementsToSum.lastElement.trId = null;
+                        const allTd = document.querySelectorAll('td');
+                        allTd.forEach(cell => {
+                            if(cell.textContent == '0') {
+                                cell.style.background = "#b9f4b7";
+                            }
+                        })
+                    }, "columns": [
+                        {"data": "numberOfWeek"},
+                        {"data": "dayName"},
+                        {"data": "day"},
+                            @foreach($departmentInfo as $item)
+                        {
+                            "data": `{{$item->name2}}`, "searchable": false
+                        },
+                            @endforeach
+                        {
+                            "data": "totalScore"
+                        },
+                        {
+                            "data": function (data, type, dataToSet) {
+                                return data.allSet
+                            }, "name": "allSet"
+                        }
+                    ]
+                }),
+
+                setTableData: function (data){
+                    let table = this.dataTable;
+                    table.clear();
+                    if($.isArray(data)) {
+                        $.each(data, function (index, row) {
+                            table.row.add(row).draw();
+                        });
+                    }
+                }
+            };
 
 
             /*********************EVENT LISTENERS FUNCTIONS****************************/
