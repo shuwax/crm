@@ -127,7 +127,7 @@
                 swal(
                     'Usunięte!',
                     'Szablon został usunięty',
-                    'Sukces'
+                    'success'
                 )
             }
             });

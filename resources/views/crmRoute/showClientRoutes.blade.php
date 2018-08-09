@@ -264,7 +264,18 @@
                     <h4 class="modal-title">Edytuj</h4>
                 </div>
                 <div class="modal-body edit-modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="leftPart">
 
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="rightPart">
+
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Zamknij okno</button>
@@ -793,6 +804,24 @@
             }
 
             /**
+             * This function append to modal limit input
+             */
+            function appendSingleLimitInput(placeToAppend, limitNumber = 0) {
+                let label = document.createElement('label');
+                label.setAttribute('for', 'singleLimit_' + limitNumber);
+                label.textContent = 'Limit ' + limitNumber;
+                placeToAppend.appendChild(label);
+
+                let limitInput = document.createElement('input');
+                limitInput.id = 'singleLimit_' + limitNumber;
+                limitInput.setAttribute('type', 'number');
+                limitInput.setAttribute('step', '1');
+                limitInput.setAttribute('min', '0');
+                limitInput.classList.add('form-control');
+                placeToAppend.appendChild(limitInput);
+            }
+
+            /**
              * This function create one row of modal table and place it in rows array.
              */
             function createModalTableRow() {
@@ -868,7 +897,17 @@
                 });
 
                 infoTable.appendChild(tbodyElement);
-                placeToAppend.appendChild(infoTable);
+                placeToAppend.insertAdjacentElement('afterbegin', infoTable);
+            }
+
+            function appendHeading(placeToAppend, text) {
+                let heading = document.createElement('div');
+                heading.classList.add('heading');
+                heading.style.fontSize = '1.4em';
+                heading.textContent = text;
+                let line = document.createElement('hr');
+                placeToAppend.insertAdjacentElement('afterbegin', line);
+                placeToAppend.insertAdjacentElement('afterbegin', heading);
             }
 
             /**
@@ -876,12 +915,37 @@
              */
             function addModalBodyContext() {
                 let modalBody = document.querySelector('.edit-modal-body');
-                modalBody.innerHTML = ''; //clear modal body
+                let modalBody1 = document.querySelector('.leftPart');
+                let modalBody2 = document.querySelector('.rightPart');
+
+                if(modalBody.querySelector('table')) {
+                    let modalTable = modalBody.querySelector('table');
+                    modalTable.parentNode.removeChild(modalTable);
+                }
+                if(modalBody.querySelector('#submitEdition')) {
+                    let modalSaveButton = modalBody.querySelector('#submitEdition');
+                    modalSaveButton.parentNode.removeChild(modalSaveButton);
+                }
+
+                if(modalBody.querySelector('.heading')) {
+                    let heading = modalBody.querySelector('.heading');
+                    heading.parentNode.removeChild(heading);
+                }
+
+
+                modalBody1.innerHTML = ''; //clear modal body1
+                modalBody2.innerHTML = ''; //clear modal body2
+
+                appendHeading(modalBody1, 'Limity dla kampanii 2 i 3 pokazowej');
+                appendHeading(modalBody2, 'Limit dla kampanii 1 pokazowej');
 
                 createModalTable(modalBody); //table part of modal
-                appendLimitInput(modalBody, 1);
-                appendLimitInput(modalBody, 2);
-                appendLimitInput(modalBody, 3);
+                appendHeading(modalBody, 'Przypisywanie limitów działa poprawnie dla tras, które mają max 3 dni oraz max 3 godziny pokazów w poszczególnym dniu');
+                appendLimitInput(modalBody1, 1);
+                appendLimitInput(modalBody1, 2);
+                appendLimitInput(modalBody1, 3);
+
+                appendSingleLimitInput(modalBody2, 1);
 
                 let submitButton = document.createElement('button');
                 submitButton.id = 'submitEdition';
@@ -899,10 +963,12 @@
                     const limitInput1 = document.querySelector('#changeLimits_1');
                     const limitInput2 = document.querySelector('#changeLimits_2');
                     const limitInput3 = document.querySelector('#changeLimits_3');
+                    const singleLimitInput = document.querySelector('#singleLimit_1');
 
                     const limitValue1 = limitInput1.value;
                     const limitValue2 = limitInput2.value;
                     const limitValue3 = limitInput3.value;
+                    const singleLimitvalue = singleLimitInput.value;
 
                     const url = `{{route('api.changeLimits')}}`;
                     const header = new Headers();
@@ -913,6 +979,7 @@
                     data.append('limit1', limitValue1);
                     data.append('limit2', limitValue2);
                     data.append('limit3', limitValue3);
+                    data.append('singleLimit', singleLimitvalue);
 
                     fetch(url, {
                         method: "POST",
@@ -1349,32 +1416,6 @@
             });
 
             window.addEventListener('pagehide', setItemsToSeessionStorage);
-
-            function globalClickHandler(e) {
-
-                //after clicking on hotels and hours edit, we append to localStorage info about givenRole
-                /*if(e.target.dataset.type == 1) {
-                    const clickedRow = e.target.parentElement.parentElement.parentElement;
-                    const weekNumber = $(clickedRow).children().get(0).innerHTML;
-                    const clientName = $(clickedRow).children().get(1).innerHTML;
-                    const firstShowDate = $(clickedRow).children().get(2).innerHTML;
-                    const routeName = $(clickedRow).children().get(3).innerHTML;
-                    let routeId = clickedRow.closest('tr').prop('id');
-                    routeId = routeId.split('_');
-                    routeId = routeId[1];
-                    localStorage.setItem('weekNumber_' + routeId, weekNumber);
-                    localStorage.setItem('clientName_' + routeId, clientName);
-                    localStorage.setItem('firstShowDate_' + routeId, firstShowDate);
-                    localStorage.setItem('routeName_' + routeId, routeName);
-                }*/
-
-                //after clicking on route edit, we append to sessionStorage info about givenRole
-                if(e.target.dataset.type == 2) {
-                }
-
-            }
-
-            document.addEventListener('click', globalClickHandler);
 
         });
     </script>

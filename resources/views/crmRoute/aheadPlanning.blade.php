@@ -56,9 +56,13 @@
             border-width: 1px !important;
         }
 
+        .selectedRowDay{
+            background: #bcb7ff !important;
+        }
         .alert-info {
             font-size: 1.2em;
         }
+<<<<<<< HEAD
          .limitSection, .limitInput, .separate {
              margin-top: 2%
          }
@@ -70,20 +74,22 @@
         }
 
 
+=======
+        .thisDay{
+            background: #fffc8b !important;
+        }
+        .dropdown-menu {
+            left: 0px;
+        }
+
+>>>>>>> upstream/develop
     </style>
 
     {{--Header page --}}
-    <div class="row">
-        <div class="col-md-12">
             <div class="page-header">
                 <div class="alert gray-nav ">Planowanie Wyprzedzenia</div>
             </div>
-        </div>
-    </div>
 
-
-    <div class="row">
-        <div class="col-lg-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     Planowanie wyprzedzenia
@@ -127,6 +133,7 @@
                             </div>
                         </div>
                     </div>
+<<<<<<< HEAD
 
 
                     <div id="modalSimulationClient" class="modal fade" role="dialog">
@@ -257,6 +264,30 @@
 
 
                                         </div>
+=======
+                    <div class="row">
+                        <div class="col-md-4 buttonSection">
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-md-4">
+                            <button class="btn btn-block btn-default" id="resultsSimulationButton">Symulacje wyników <span class="glyphicon glyphicon-chevron-down"></span></button>
+                            <div class="simulationSection well well-sm">
+                                <div class="row">
+                                    <div class="col-md-12 ">
+                                        <select id="simulation" class="selectpicker form-control show-tick" title="Wybierz symulację wyników">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label>Dni wolne</label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <button id="simulationButton" class="btn btn-block btn-primary">Symuluj</button>
+>>>>>>> upstream/develop
                                     </div>
                                 </div>
                             </div>
@@ -283,8 +314,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
 @endsection
 
@@ -293,6 +322,7 @@
     <script src="{{ asset('/js/fixedColumns.dataTables.min.js')}}"></script>
     <script src="{{ asset('/js/dataTables.fixedHeader.min.js')}}"></script>
     <script src="{{ asset('/js/dataTables.bootstrap.min.js')}}"></script>
+    <script src="{{ asset('/js/moment.js')}}"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -317,22 +347,31 @@
                 firstElement: {trId: null, tdId: null},
                 lastElement: {trId: null, tdId: null}
             };
+
             let sumOfSelectedCells = 0;
-            const now = new Date();
-            // const day = ("0" + now.getDate()).slice(-2);
-            const month = ("0" + (now.getMonth() + 1)).slice(-2);
-            // const today = now.getFullYear() + "-" + (month) + "-" + (day);
-            const firstDayOfThisMonth = now.getFullYear() + "-" + (month) + "-01";
+
+            let selectedRowDays = [];
+
+            const firstDayOfThisMonth = moment().format('YYYY-MM')+'-01';
+            const today = moment().format('YYYY-MM-DD');
+            const startDate = moment().add(-1,'w').format('YYYY-MM-DD');
+            const stopDate = moment().add(3,'w').format('YYYY-MM-DD');
             /*******END OF GLOBAL VARIABLES*********/
 
-            $('#date_start').val(firstDayOfThisMonth);
+            $('#date_start').val(startDate);
+            $('#date_stop').val(stopDate);
 
             /*********************DataTable FUNCTUONS****************************/
             let aheadPlanningData = {
                 limitSimulation: null,
                 newClientSimulation: null,
+                data: {
+                    aheadPlaning: null,
+                    departmentsInvitationsAverages: null
+                },
                 getData: function (startDate, stopDate) {
                     let deffered = $.Deferred();
+                    let obj = this;
                     $.ajax({
                         url: "{{ route('api.getaHeadPlanningInfo') }}",
                         type: 'POST',
@@ -340,13 +379,16 @@
                         data: {
                             startDate: startDate,
                             stopDate: stopDate,
-                            limitSimulation: this.limitSimulation,
-                            newClientSimulation: this.newClientSimulation
+                            limitSimulation: obj.limitSimulation,
+                            newClientSimulation: obj.newClientSimulation,
+                            departmentsInvitationsAverages: obj.data.departmentsInvitationsAverages
                         },
                         success: function (response) {
-                            deffered.resolve(response);
+                            obj.data.aheadPlaning = response.aheadPlanningData;
+                            obj.data.departmentsInvitationsAverages = response.departmentsInvitationsAveragesData;
+                            deffered.resolve(obj.data.aheadPlaning);
                         },
-                        function (jqXHR, textStatus, thrownError) {
+                        error: function (jqXHR, textStatus, thrownError) {
                             console.log(jqXHR);
                             console.log('textStatus: ' + textStatus);
                             console.log('hrownError: ' + thrownError);
@@ -355,7 +397,6 @@
                                 title: 'Błąd ' + jqXHR.status,
                                 text: 'Wystąpił błąd: ' + thrownError+' "'+jqXHR.responseJSON.message+'"',
                             });
-                            $('#saveHotel').prop('disabled', false);
                             deffered.reject();
                         }
                     });
@@ -363,8 +404,10 @@
                 }
             };
 
+            $('#datatable_processing').show();
             aheadPlanningData.getData($('#date_start').val(),$("#date_stop").val()).done(function (response) {
                 aheadPlaningTable.setTableData(response);
+                $('#datatable_processing').hide();
             });
 
             let aheadPlaningTable = {
@@ -374,12 +417,21 @@
                     scrollX: true,
                     scrollCollapse: true,
                     paging: false,
+                    processing: true,
                     fixedColumns: {
                         leftColumns: 3
                     },
                     "language": {
                         "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Polish.json"
-                    }, fnDrawCallback: function () {
+                    },
+                    fnRowCallback:  function( nRow, aData, iDisplayIndex, iDisplayIndexFull ){
+                        if(aData.day === today){
+                            for( i = 0 ; i< 3; i++){
+                                $($(nRow).children()[i]).addClass('thisDay');
+                            }
+                        }
+                    },
+                    fnDrawCallback: function () {
                         elementsToSum.firstElement.tdId = null;
                         elementsToSum.firstElement.trId = null;
                         elementsToSum.lastElement.tdId = null;
@@ -390,22 +442,23 @@
                                 cell.style.background = "#b9f4b7";
                             }
                         })
-                    }, "columns": [
-                        {"data": "numberOfWeek"},
-                        {"data": "dayName"},
-                        {"data": "day"},
+                    }, order: [[2,'asc']]
+                    ,"columns": [
+                        {"data": "numberOfWeek", orderable: false},
+                        {"data": "dayName", orderable: false},
+                        {"data": "day", orderable: false},
                             @foreach($departmentInfo as $item)
                         {
-                            "data": `{{$item->name2}}`, "searchable": false
+                            "data": `{{$item->name2}}`, "searchable": false, orderable: false
                         },
                             @endforeach
                         {
-                            "data": "totalScore"
+                            "data": "totalScore", orderable: false
                         },
                         {
                             "data": function (data, type, dataToSet) {
                                 return data.allSet
-                            }, "name": "allSet"
+                            }, "name": "allSet", orderable: false
                         }
                     ]
                 }),
@@ -426,7 +479,14 @@
 
 
             $('#date_start, #date_stop').on('change', function () {
-                table.ajax.reload();
+                $('#datatable_processing').show();
+                aheadPlaningTable.dataTable.clear();
+                aheadPlaningTable.dataTable.draw();
+                aheadPlanningData.getData($('#date_start').val(),$("#date_stop").val()).done(function (response) {
+                    aheadPlaningTable.setTableData(response);
+                    $('#datatable_processing').hide();
+                });
+                //table.ajax.reload();
             });
 
             /**
@@ -455,12 +515,12 @@
                 let tableElement = trElement.parent();
                 let clickedElementTdIndex = trElement.children().index(clickedElement);
                 let clickedElementTrIndex = tableElement.children().index(trElement);
-                if (clickedElement.is('td') && clickedElementTdIndex >= 3 && clickedElementTdIndex < trElement.children().length - 1)
+                if (clickedElement.is('td') && clickedElementTdIndex >= 3 && clickedElementTdIndex < trElement.children().length - 1){
                     if (e.shiftKey) {
                         if (elementsToSum.firstElement.tdId !== null) {
                             elementsToSum.lastElement.tdId = elementsToSum.lastElement.tdId; //clickedElementTdIndex;
                             elementsToSum.lastElement.trId = clickedElementTrIndex;
-                            colorCells(elementsToSum);
+                            colorCellsRectangle(elementsToSum);
                             $.notify({
                                 title: $($('#datatable tr').first().children().get(elementsToSum.firstElement.tdId)).text() + ': ',
                                 message: '<strong>' + sumOfSelectedCells + '</strong>'
@@ -488,15 +548,43 @@
                             elementsToSum.lastElement.tdId = null;
                             elementsToSum.lastElement.trId = null;
                         } else
-                            colorCells(elementsToSum);
+                            colorCellsRectangle(elementsToSum);
                     }
+                }else if(clickedElement.is('td') && clickedElementTdIndex < 3){
+                    let selectedSimulationsIndex = $('#simulation').val();
+                    if(simulations[selectedSimulationsIndex]){
+                        if($.inArray(clickedElementTrIndex, selectedRowDays) >= 0){
+                            selectedRowDays.splice(selectedRowDays.indexOf(clickedElementTrIndex),1);
+                            console.log('remove');
+                            console.log(selectedRowDays);
+                        }else if(selectedRowDays.length < simulations[selectedSimulationsIndex].availableSelectedDays){
+                            selectedRowDays.push(clickedElementTrIndex);
+                            console.log('add');
+                            console.log(selectedRowDays);
+                        }
+                    }
+                    colorSelectedRowDays();
+                }
+
+            }
+
+            function colorSelectedRowDays() {
+                let colorClassSelectedRowDay = 'selectedRowDay';
+                $('.'+colorClassSelectedRowDay).removeClass(colorClassSelectedRowDay);
+                let tableTr = $('.DTFC_LeftBodyWrapper .table.dataTable tbody').children();
+                $.each(selectedRowDays, function (index, item) {
+                    let tds = $(tableTr[item]).children();
+                    for(i = 0; i < 3; i++){
+                        $(tds[i]).addClass(colorClassSelectedRowDay);
+                    }
+                });
             }
 
             /**
              * This function add class 'colorCell' to cells in array of cells appointed by two corner cells.
              * Elements is a object that has positions of first and last cell (tr and td id's)
              */
-            function colorCells(elements) {
+            function colorCellsRectangle(elements) {
                 $('.colorCell').removeClass('colorCell');
                 trElements = $('#datatable tr');
 
@@ -533,6 +621,80 @@
                 //rightTopCell = $($(trElements.get(firstElementTrId + 1)).children().get(lastElementTdId));
 
             }
+
+            //  simulations template
+            function Simulation( name, availableSelectedDays, simulateCallback, validateCallback) {
+                return {
+                    name: name,
+                    availableSelectedDays: availableSelectedDays,
+                    simulate: function () {
+                        simulateCallback();
+                    },
+                    validate: function () {
+                        validateCallback();
+                    }
+                };
+            }
+
+            /*  ---------------------- creating available simulations ---------------------- */
+            let simulations = [];
+
+            simulations.push(Simulation(
+                'Przewidywanie wyprzedzenia na wybrany dzień',
+                1,
+                function (){
+
+                },
+                function () {
+
+                }
+            ));
+            simulations.push(Simulation(
+                'Wyliczenie średniej zaproszeń dla oddziałów',
+                2,
+                function () {
+
+                },
+                function () {
+
+                }
+            ));
+            /*  ---------------------- end creating available simulations ---------------------- */
+
+            // fill simulation select with created simulation objects
+            $.each(simulations,function(index, item){
+                $('#simulation').append($('<option>', {
+                    value: index,
+                    text: item.name
+                }));
+            });
+
+            $('#simulation').change(function () {
+               selectedRowDays = [];
+               colorSelectedRowDays();
+            });
+
+            $('.simulationSection').hide();
+            $('#resultsSimulationButton').click(function () {
+               $('.simulationSection').slideToggle('slow', function () {
+
+                   if($('.simulationSection').is(':hidden')){
+                       $('#resultsSimulationButton span').removeClass().addClass('glyphicon glyphicon-chevron-down');
+                   }else{
+                       $('#resultsSimulationButton span').removeClass().addClass('glyphicon glyphicon-chevron-up');
+                   }
+               });
+            });
+
+            $('#simulationButton').click(function () {
+                let simulationIndex = $('#simulation').val();
+                if(simulations[simulationIndex]){
+                    simulations[simulationIndex].validate();
+                    simulations[simulationIndex].simulate();
+                }else{
+                    swal('Wybierz symulację');
+                }
+            });
         });
     </script>
 @endsection
