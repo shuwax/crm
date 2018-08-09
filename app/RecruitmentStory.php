@@ -99,11 +99,52 @@ class RecruitmentStory extends Model
         return $result2;
     }
 
+    public static function getReportTrainingDataAndHire($data_start,$data_stop){
+        //4712
+        $records = DB::table('group_training')
+            ->select(DB::raw('
+                group_training.id as groupTrainingID,
+                candidate.id as candidateID,
+                group_training.training_date,
+                recruitment_story.recruitment_attempt_id,
+                0 as last_recruitment_story_id,
+                0 as attempt_status_id,
+                0 as userID,
+                0 as departmentInfoId
+            '))
+            ->join('candidate_training','candidate_training.training_id','group_training.id')
+            ->join('recruitment_story','recruitment_story.id','candidate_training.completed_training')
+            ->join('recruitment_attempt','recruitment_attempt.id','recruitment_story.recruitment_attempt_id')
+            ->join('candidate','candidate.id','recruitment_story.candidate_id')
+            ->whereBetween('group_training.training_date', [$data_start, $data_stop])
+            ->where('recruitment_attempt.training_date','=',null)
+            ->where('recruitment_attempt.status',1)
+            ->where('recruitment_story.attempt_status_id',8)
+            ->where('group_training.training_stage',1)
+            ->get();
+        $records = $records->map(function ($item){
+            $lookingData = RecruitmentStory::where('recruitment_attempt_id',$item->recruitment_attempt_id)->orderby('id','desc')->first();
+            $item->last_recruitment_story_id = $lookingData->id;
+            $item->attempt_status_id = $lookingData->attempt_status_id;
+            if($item->attempt_status_id == 10){
+                $findCandidateInUser = User::where('candidate_id',$item->candidateID)->first();
+                if(!empty($findCandidateInUser)){
+                    $item->userID = $findCandidateInUser->id;
+                    $item->departmentInfoId = $findCandidateInUser->department_info_id;
+                }
+            }
+           return  $item;
+        })->where('attempt_status_id',10)->where('userID','!=',0);
+
+
+        return $records;
+    }
     public static function getReportTrainingData($data_start,$data_stop){
          $records = DB::table('group_training')
             ->select(DB::raw('
                 sum(candidate_choise_count) as sum_choise,
                 sum(candidate_absent_count) as sum_absent,
+                group_training.training_stage,
                 department_info.id as dep_id,
                 departments.name as dep_name,
                 department_type.name as dep_name_type
@@ -112,26 +153,40 @@ class RecruitmentStory extends Model
             ->join('departments', 'departments.id', 'department_info.id_dep')
             ->join('department_type', 'department_type.id', 'department_info.id_dep_type')
             ->whereBetween('training_date', [$data_start, $data_stop])
-            ->groupBy('department_info.id')
+            ->groupBy('department_info.id','training_stage')
             ->get();
 
-        $deps = Department_info::all();
+        $deps = Department_info::where('commission_avg','!=',0)->get();
         $data=[];
+        $departmentUserArray = [];
         foreach ($deps as $dep) {
-            $dep_data = new \stdClass();
-            $dep_data->dep_name = $dep->departments->name;
-            $dep_data->dep_name_type = $dep->department_type->name;
-            $dep_data->sum_choise = 0;
-            $dep_data->sum_absent = 0;
-            foreach($records as $item) {
-                if ($item->dep_id == $dep->id) {
-                    $dep_data->sum_choise = $item->sum_choise;
-                    $dep_data->sum_absent = $item->sum_absent;
+            if(!in_array($dep->id,$departmentUserArray))
+            {
+                $dep_data = new \stdClass();
+                $dep_data->dep_id = $dep->id;
+                $dep_data->countHireUserFromFirstTrainingGroup = 0;
+                $dep_data->dep_name = $dep->departments->name;
+                $dep_data->dep_name_type = $dep->department_type->name;
+                $dep_data->sum_choise_stageOne = 0;
+                $dep_data->sum_absent_stageOne = 0;
+                $dep_data->sum_choise_stageTwo = 0;
+                $dep_data->sum_absent_stageTwo = 0;
+                $dep_data->procScore = 0;
+                foreach($records as $item) {
+                    if ($item->dep_id == $dep->id) {
+                        if($item->training_stage == 1){
+                            $dep_data->sum_choise_stageOne = $item->sum_choise;
+                            $dep_data->sum_absent_stageOne = $item->sum_absent;
+                        }else{
+                            $dep_data->sum_choise_stageTwo = $item->sum_choise;
+                            $dep_data->sum_absent_stageTwo = $item->sum_absent;
+                        }
+                    }
                 }
+                $data[] = $dep_data;
+                array_push($departmentUserArray,$dep->id);
             }
-            $data[] = $dep_data;
         }
-
         return collect($data)->sortByDesc('sum_choise');
     }
 
@@ -153,7 +208,7 @@ class RecruitmentStory extends Model
                 ->join('departments', 'departments.id', 'department_info.id_dep')
                 ->join('department_type', 'department_type.id', 'department_info.id_dep_type')
                 ->whereBetween('recruitment_story.created_at', [$date_start . ' 01:00:00', $date_stop . ' 23:00:00'])
-                ->where('recruitment_story.attempt_status_id','=',17)
+                ->where('recruitment_story.attempt_status_id',10)
                 ->groupBy('candidate.department_info_id','recruitment_story.attempt_result_id')
                 ->get();
 

@@ -10,8 +10,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet"/>
     <link href="{{ asset('/css/fixedColumns.dataTables.min.css')}}" rel="stylesheet">
     <link href="{{asset('/css/fixedHeader.dataTables.min.css')}}" rel="stylesheet">
-
-
 @endsection
 @section('content')
 
@@ -58,23 +56,40 @@
             border-width: 1px !important;
         }
 
+        .selectedRowDay{
+            background: #bcb7ff !important;
+        }
         .alert-info {
             font-size: 1.2em;
         }
+<<<<<<< HEAD
+         .limitSection, .limitInput, .separate {
+             margin-top: 2%
+         }
+        .separate{
+            margin-bottom: 14px
+        }
+        .dropdown-menu{
+            left: 0%;
+        }
+
+
+=======
+        .thisDay{
+            background: #fffc8b !important;
+        }
+        .dropdown-menu {
+            left: 0px;
+        }
+
+>>>>>>> upstream/develop
     </style>
 
     {{--Header page --}}
-    <div class="row">
-        <div class="col-md-12">
             <div class="page-header">
                 <div class="alert gray-nav ">Planowanie Wyprzedzenia</div>
             </div>
-        </div>
-    </div>
 
-
-    <div class="row">
-        <div class="col-lg-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     Planowanie wyprzedzenia
@@ -85,7 +100,7 @@
                 </div>
                 <div class="panel-body">
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label for="date" class="myLabel">Data początkowa:</label>
                                 <div class="input-group date form_date col-md-5" data-date=""
@@ -96,8 +111,7 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="col-md-3">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label for="date_stop" class="myLabel">Data końcowa:</label>
                                 <div class="input-group date form_date col-md-5" data-date=""
@@ -108,12 +122,178 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 buttonSection">
-
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <button class="btn btn-default simulationClientLimit"  data-toggle="modal" data-target="#modalSimulationClient" >Symulacja Klienta(Edycja Limitów)</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <button class="btn btn-default simulationNewClient"  data-toggle="modal"  data-target="#modalSimulationClient" >Symulacja Klienta(Nowy Klient)</button>
+                            </div>
                         </div>
                     </div>
+<<<<<<< HEAD
+
+
+                    <div id="modalSimulationClient" class="modal fade" role="dialog">
+                        <div class="modal-dialog modal-lg" style="width: 90%">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title" id="modal_title">Sekcja symulatcji<span id="modal_category"></span></h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            Symalacja limitów klienta
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="col-md-12 ">
+                                                <div class="changeClientLimit" style="margin-bottom: 1%">
+                                                    <div class="col-md-6">
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon">Wybierz klienta</span>
+                                                            <select class="form-control selectedClientToChangeLimit selectpicker" title="Wybierz klientów..."
+                                                                    data-live-search=”true” data-width="100%" multiple="multiple"
+                                                            >
+                                                                <option>1</option>
+                                                                <option>2</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon">Wybierz datę zmiany limitów</span>
+                                                            <input  class="form-control dateStartClientToChangeLimit" name="dateStartClientToChangeLimit">
+                                                        </div>
+                                                    </div>
+                                                    <div class="limitSection">
+                                                        <div class="col-md-4">
+                                                            <label for="exampleInputEmail1">Limit dla pokazów pełnych (3)</label>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #1</span>
+                                                                <input class="form-control AllFirstLimit" name="AllFirstLimit">
+                                                            </div>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #2</span>
+                                                                <input class="form-control AllSecondLimit" name="AllSecondLimit">
+                                                            </div>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #3</span>
+                                                                <input class="form-control AllThirdLimit" name="AllThirdLimit">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label for="exampleInputEmail1">Limit dla pokazów godzinowych</label>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #1</span>
+                                                                <input class="form-control OnlyFirstLimit" name="OnlyFirstLimit">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <button class="btn btn-default separate" class="AddNewSimulation">
+                                                                <span class="glyphicon glyphicon-plus"></span> <span>Dodaj Kolejną symulacje</span>
+                                                            </button>
+                                                            <button class="btn btn-danger separate" class="RemoveSimulation">
+                                                                <span class="glyphicon glyphicon-minus"></span> <span>Usuń Symulację</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-md-12" style="border-bottom: 2px;background: black;">
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="changeClientLimit" style="margin-bottom: 1%">
+                                                    <div class="col-md-6">
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon">Wybierz klienta</span>
+                                                            <select class="form-control selectedClientToChangeLimit">
+                                                                <option>1</option>
+                                                                <option>2</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon">Wybierz datę zmiany limitów</span>
+                                                            <input  class="form-control dateStartClientToChangeLimit" name="dateStartClientToChangeLimit">
+                                                        </div>
+                                                    </div>
+                                                    <div class="limitSection">
+                                                        <div class="col-md-4">
+                                                            <label for="exampleInputEmail1">Limit dla pokazów pełnych (3)</label>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #1</span>
+                                                                <input class="form-control AllFirstLimit" name="AllFirstLimit">
+                                                            </div>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #2</span>
+                                                                <input class="form-control AllSecondLimit" name="AllSecondLimit">
+                                                            </div>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #3</span>
+                                                                <input class="form-control AllThirdLimit" name="AllThirdLimit">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label for="exampleInputEmail1">Limit dla pokazów godzinowych</label>
+                                                            <div class="input-group limitInput">
+                                                                <span class="input-group-addon">Limit #1</span>
+                                                                <input class="form-control OnlyFirstLimit" name="OnlyFirstLimit">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <button class="btn btn-default separate" class="AddNewSimulation">
+                                                                <span class="glyphicon glyphicon-plus"></span> <span>Dodaj Kolejną symulacje</span>
+                                                            </button>
+
+                                                            <button class="btn btn-danger separate" class="RemoveSimulation">
+                                                                <span class="glyphicon glyphicon-minus"></span> <span>Usuń Symulację</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+
+
+
+                                        </div>
+=======
+                    <div class="row">
+                        <div class="col-md-4 buttonSection">
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-md-4">
+                            <button class="btn btn-block btn-default" id="resultsSimulationButton">Symulacje wyników <span class="glyphicon glyphicon-chevron-down"></span></button>
+                            <div class="simulationSection well well-sm">
+                                <div class="row">
+                                    <div class="col-md-12 ">
+                                        <select id="simulation" class="selectpicker form-control show-tick" title="Wybierz symulację wyników">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label>Dni wolne</label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <button id="simulationButton" class="btn btn-block btn-primary">Symuluj</button>
+>>>>>>> upstream/develop
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <table id="datatable" class="table table-striped row-border" style="width:100%;">
                         <thead>
                         <tr>
@@ -125,50 +305,15 @@
                             @endforeach
                             <th>Suma</th>
                             <th>Podział</th>
-                            {{--@foreach($departmentInfo as $item)--}}
-                            {{--<th>CEL {{$item->name2.' '.$item->name}}</th>--}}
-                            {{--@endforeach--}}
                         </tr>
                         </thead>
                         <tbody>
-                        {{--@foreach($departmentInfo as $item)--}}
-                        {{--<tr>--}}
-                        {{--<td>1</td>--}}
-                        {{--<td>2</td>--}}
-                        {{--<td>3</td>--}}
-                        {{--@foreach($departmentInfo as $item)--}}
-                        {{--<td>1123123123123123</td>--}}
-                        {{--@endforeach--}}
-                        {{--<td>5</td>--}}
-                        {{--<td>6</td>--}}
-                        {{--@foreach($departmentInfo as $item)--}}
-                        {{--<td>1123123123123123</td>--}}
-                        {{--@endforeach--}}
-                        {{--</tr>--}}
-                        {{--@endforeach--}}
-                        {{--@foreach($departmentInfo as $item)--}}
-                        {{--<tr>--}}
-                        {{--<td>1</td>--}}
-                        {{--<td>2</td>--}}
-                        {{--<td>3</td>--}}
-                        {{--@foreach($departmentInfo as $item)--}}
-                        {{--<td>1123123123123123</td>--}}
-                        {{--@endforeach--}}
-                        {{--<td>5</td>--}}
-                        {{--<td>6</td>--}}
-                        {{--@foreach($departmentInfo as $item)--}}
-                        {{--<td>1123123123123123</td>--}}
-                        {{--@endforeach--}}
-                        {{--</tr>--}}
-                        {{--@endforeach--}}
                         </tbody>
                     </table>
                     <div class="row">
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
 @endsection
 
@@ -177,6 +322,7 @@
     <script src="{{ asset('/js/fixedColumns.dataTables.min.js')}}"></script>
     <script src="{{ asset('/js/dataTables.fixedHeader.min.js')}}"></script>
     <script src="{{ asset('/js/dataTables.bootstrap.min.js')}}"></script>
+    <script src="{{ asset('/js/moment.js')}}"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -190,81 +336,157 @@
                 });
             })();
 
+            $('.selectpicker').selectpicker({
+                style: 'btn-info',
+                size: 4
+            });
+
 
             /********** GLOBAL VARIABLES ***********/
             let elementsToSum = {
                 firstElement: {trId: null, tdId: null},
                 lastElement: {trId: null, tdId: null}
             };
+
             let sumOfSelectedCells = 0;
-            const now = new Date();
-            // const day = ("0" + now.getDate()).slice(-2);
-            const month = ("0" + (now.getMonth() + 1)).slice(-2);
-            // const today = now.getFullYear() + "-" + (month) + "-" + (day);
-            const firstDayOfThisMonth = now.getFullYear() + "-" + (month) + "-01";
+
+            let selectedRowDays = [];
+
+            const firstDayOfThisMonth = moment().format('YYYY-MM')+'-01';
+            const today = moment().format('YYYY-MM-DD');
+            const startDate = moment().add(-1,'w').format('YYYY-MM-DD');
+            const stopDate = moment().add(3,'w').format('YYYY-MM-DD');
             /*******END OF GLOBAL VARIABLES*********/
 
-            $('#date_start').val(firstDayOfThisMonth);
+            $('#date_start').val(startDate);
+            $('#date_stop').val(stopDate);
 
             /*********************DataTable FUNCTUONS****************************/
-
-            let table = $('#datatable').DataTable({
-                serverSide: true,
-                scrollY: '60vh',
-                scrollX: true,
-                scrollCollapse: true,
-                paging: false,
-                fixedColumns: {
-                    leftColumns: 3
+            let aheadPlanningData = {
+                limitSimulation: null,
+                newClientSimulation: null,
+                data: {
+                    aheadPlaning: null,
+                    departmentsInvitationsAverages: null
                 },
-                "ajax": {
-                    'url': "{{ route('api.getaHeadPlanningInfo') }}",
-                    'type': 'POST',
-                    'data': function (d) {
-                        d.startDate = $('#date_start').val();
-                        d.stopDate = $("#date_stop").val();
-                    },
-                    'headers': {'X-CSRF-TOKEN': '{{ csrf_token() }}'}
-                },
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Polish.json"
-                }, fnDrawCallback: function () {
-                    elementsToSum.firstElement.tdId = null;
-                    elementsToSum.firstElement.trId = null;
-                    elementsToSum.lastElement.tdId = null;
-                    elementsToSum.lastElement.trId = null;
-                    const allTd = document.querySelectorAll('td');
-                    allTd.forEach(cell => {
-                        if(cell.textContent == '0') {
-                            cell.style.background = "#b9f4b7";
+                getData: function (startDate, stopDate) {
+                    let deffered = $.Deferred();
+                    let obj = this;
+                    $.ajax({
+                        url: "{{ route('api.getaHeadPlanningInfo') }}",
+                        type: 'POST',
+                        headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                        data: {
+                            startDate: startDate,
+                            stopDate: stopDate,
+                            limitSimulation: obj.limitSimulation,
+                            newClientSimulation: obj.newClientSimulation,
+                            departmentsInvitationsAverages: obj.data.departmentsInvitationsAverages
+                        },
+                        success: function (response) {
+                            obj.data.aheadPlaning = response.aheadPlanningData;
+                            obj.data.departmentsInvitationsAverages = response.departmentsInvitationsAveragesData;
+                            deffered.resolve(obj.data.aheadPlaning);
+                        },
+                        error: function (jqXHR, textStatus, thrownError) {
+                            console.log(jqXHR);
+                            console.log('textStatus: ' + textStatus);
+                            console.log('hrownError: ' + thrownError);
+                            swal({
+                                type: 'error',
+                                title: 'Błąd ' + jqXHR.status,
+                                text: 'Wystąpił błąd: ' + thrownError+' "'+jqXHR.responseJSON.message+'"',
+                            });
+                            deffered.reject();
                         }
-                    })
-                }, "columns": [
-                    {"data": "numberOfWeek"},
-                    {"data": "dayName"},
-                    {"data": "day"},
-                        @foreach($departmentInfo as $item)
-                    {
-                        "data": `{{$item->name2}}`, "searchable": false
-                    },
-                        @endforeach
-                    {
-                        "data": "totalScore"
-                    },
-                    {
-                        "data": function (data, type, dataToSet) {
-                            return data.allSet
-                        }, "name": "allSet"
-                    }
-                ]
+                    });
+                    return deffered.promise();
+                }
+            };
+
+            $('#datatable_processing').show();
+            aheadPlanningData.getData($('#date_start').val(),$("#date_stop").val()).done(function (response) {
+                aheadPlaningTable.setTableData(response);
+                $('#datatable_processing').hide();
             });
+
+            let aheadPlaningTable = {
+                dataTable:  $('#datatable').DataTable({
+                    //serverSide: true,
+                    scrollY: '60vh',
+                    scrollX: true,
+                    scrollCollapse: true,
+                    paging: false,
+                    processing: true,
+                    fixedColumns: {
+                        leftColumns: 3
+                    },
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Polish.json"
+                    },
+                    fnRowCallback:  function( nRow, aData, iDisplayIndex, iDisplayIndexFull ){
+                        if(aData.day === today){
+                            for( i = 0 ; i< 3; i++){
+                                $($(nRow).children()[i]).addClass('thisDay');
+                            }
+                        }
+                    },
+                    fnDrawCallback: function () {
+                        elementsToSum.firstElement.tdId = null;
+                        elementsToSum.firstElement.trId = null;
+                        elementsToSum.lastElement.tdId = null;
+                        elementsToSum.lastElement.trId = null;
+                        const allTd = document.querySelectorAll('td');
+                        allTd.forEach(cell => {
+                            if(cell.textContent == '0') {
+                                cell.style.background = "#b9f4b7";
+                            }
+                        })
+                    }, order: [[2,'asc']]
+                    ,"columns": [
+                        {"data": "numberOfWeek", orderable: false},
+                        {"data": "dayName", orderable: false},
+                        {"data": "day", orderable: false},
+                            @foreach($departmentInfo as $item)
+                        {
+                            "data": `{{$item->name2}}`, "searchable": false, orderable: false
+                        },
+                            @endforeach
+                        {
+                            "data": "totalScore", orderable: false
+                        },
+                        {
+                            "data": function (data, type, dataToSet) {
+                                return data.allSet
+                            }, "name": "allSet", orderable: false
+                        }
+                    ]
+                }),
+
+                setTableData: function (data){
+                    let table = this.dataTable;
+                    table.clear();
+                    if($.isArray(data)) {
+                        $.each(data, function (index, row) {
+                            table.row.add(row).draw();
+                        });
+                    }
+                }
+            };
 
 
             /*********************EVENT LISTENERS FUNCTIONS****************************/
 
 
             $('#date_start, #date_stop').on('change', function () {
-                table.ajax.reload();
+                $('#datatable_processing').show();
+                aheadPlaningTable.dataTable.clear();
+                aheadPlaningTable.dataTable.draw();
+                aheadPlanningData.getData($('#date_start').val(),$("#date_stop").val()).done(function (response) {
+                    aheadPlaningTable.setTableData(response);
+                    $('#datatable_processing').hide();
+                });
+                //table.ajax.reload();
             });
 
             /**
@@ -293,12 +515,12 @@
                 let tableElement = trElement.parent();
                 let clickedElementTdIndex = trElement.children().index(clickedElement);
                 let clickedElementTrIndex = tableElement.children().index(trElement);
-                if (clickedElement.is('td') && clickedElementTdIndex >= 3 && clickedElementTdIndex < trElement.children().length - 1)
+                if (clickedElement.is('td') && clickedElementTdIndex >= 3 && clickedElementTdIndex < trElement.children().length - 1){
                     if (e.shiftKey) {
                         if (elementsToSum.firstElement.tdId !== null) {
                             elementsToSum.lastElement.tdId = elementsToSum.lastElement.tdId; //clickedElementTdIndex;
                             elementsToSum.lastElement.trId = clickedElementTrIndex;
-                            colorCells(elementsToSum);
+                            colorCellsRectangle(elementsToSum);
                             $.notify({
                                 title: $($('#datatable tr').first().children().get(elementsToSum.firstElement.tdId)).text() + ': ',
                                 message: '<strong>' + sumOfSelectedCells + '</strong>'
@@ -326,15 +548,43 @@
                             elementsToSum.lastElement.tdId = null;
                             elementsToSum.lastElement.trId = null;
                         } else
-                            colorCells(elementsToSum);
+                            colorCellsRectangle(elementsToSum);
                     }
+                }else if(clickedElement.is('td') && clickedElementTdIndex < 3){
+                    let selectedSimulationsIndex = $('#simulation').val();
+                    if(simulations[selectedSimulationsIndex]){
+                        if($.inArray(clickedElementTrIndex, selectedRowDays) >= 0){
+                            selectedRowDays.splice(selectedRowDays.indexOf(clickedElementTrIndex),1);
+                            console.log('remove');
+                            console.log(selectedRowDays);
+                        }else if(selectedRowDays.length < simulations[selectedSimulationsIndex].availableSelectedDays){
+                            selectedRowDays.push(clickedElementTrIndex);
+                            console.log('add');
+                            console.log(selectedRowDays);
+                        }
+                    }
+                    colorSelectedRowDays();
+                }
+
+            }
+
+            function colorSelectedRowDays() {
+                let colorClassSelectedRowDay = 'selectedRowDay';
+                $('.'+colorClassSelectedRowDay).removeClass(colorClassSelectedRowDay);
+                let tableTr = $('.DTFC_LeftBodyWrapper .table.dataTable tbody').children();
+                $.each(selectedRowDays, function (index, item) {
+                    let tds = $(tableTr[item]).children();
+                    for(i = 0; i < 3; i++){
+                        $(tds[i]).addClass(colorClassSelectedRowDay);
+                    }
+                });
             }
 
             /**
              * This function add class 'colorCell' to cells in array of cells appointed by two corner cells.
              * Elements is a object that has positions of first and last cell (tr and td id's)
              */
-            function colorCells(elements) {
+            function colorCellsRectangle(elements) {
                 $('.colorCell').removeClass('colorCell');
                 trElements = $('#datatable tr');
 
@@ -371,6 +621,80 @@
                 //rightTopCell = $($(trElements.get(firstElementTrId + 1)).children().get(lastElementTdId));
 
             }
+
+            //  simulations template
+            function Simulation( name, availableSelectedDays, simulateCallback, validateCallback) {
+                return {
+                    name: name,
+                    availableSelectedDays: availableSelectedDays,
+                    simulate: function () {
+                        simulateCallback();
+                    },
+                    validate: function () {
+                        validateCallback();
+                    }
+                };
+            }
+
+            /*  ---------------------- creating available simulations ---------------------- */
+            let simulations = [];
+
+            simulations.push(Simulation(
+                'Przewidywanie wyprzedzenia na wybrany dzień',
+                1,
+                function (){
+
+                },
+                function () {
+
+                }
+            ));
+            simulations.push(Simulation(
+                'Wyliczenie średniej zaproszeń dla oddziałów',
+                2,
+                function () {
+
+                },
+                function () {
+
+                }
+            ));
+            /*  ---------------------- end creating available simulations ---------------------- */
+
+            // fill simulation select with created simulation objects
+            $.each(simulations,function(index, item){
+                $('#simulation').append($('<option>', {
+                    value: index,
+                    text: item.name
+                }));
+            });
+
+            $('#simulation').change(function () {
+               selectedRowDays = [];
+               colorSelectedRowDays();
+            });
+
+            $('.simulationSection').hide();
+            $('#resultsSimulationButton').click(function () {
+               $('.simulationSection').slideToggle('slow', function () {
+
+                   if($('.simulationSection').is(':hidden')){
+                       $('#resultsSimulationButton span').removeClass().addClass('glyphicon glyphicon-chevron-down');
+                   }else{
+                       $('#resultsSimulationButton span').removeClass().addClass('glyphicon glyphicon-chevron-up');
+                   }
+               });
+            });
+
+            $('#simulationButton').click(function () {
+                let simulationIndex = $('#simulation').val();
+                if(simulations[simulationIndex]){
+                    simulations[simulationIndex].validate();
+                    simulations[simulationIndex].simulate();
+                }else{
+                    swal('Wybierz symulację');
+                }
+            });
         });
     </script>
 @endsection

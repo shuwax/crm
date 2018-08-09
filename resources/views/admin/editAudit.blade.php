@@ -228,7 +228,7 @@
                     swal(
                         'Usunięte!',
                         'Kryterium zostało usunięte',
-                        'Sukces'
+                        'success'
                     )
                 }
             });
@@ -254,7 +254,7 @@
                     swal(
                         'Usunięte!',
                         'Kryterium zostało usunięte',
-                        'Sukces'
+                        'success'
                     )
                 }
             });

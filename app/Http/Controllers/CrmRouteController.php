@@ -535,6 +535,7 @@ class CrmRouteController extends Controller
     public function editAssignedRouteGet($id) {
         $voivodes = Voivodes::all();
         $client_route = ClientRoute::select('client.name as name', 'client.id as clientId', 'client_route.type as clientType')
+            ->OnlyActiveClientRoutes()
             ->join('client', 'client_route.client_id', '=', 'client.id')
             ->where('client_route.id', '=', $id)
             ->first();
@@ -787,7 +788,7 @@ class CrmRouteController extends Controller
             $cities = Cities::all();
             $city = Cities::where('id', '=', $cityId)->first();
             //part responsible for grace period
-            $clientRouteInfoAll = ClientRouteInfo::select('client_route_info.date','client_route_info.city_id','city.grace_period')
+            $clientRouteInfoAll = ClientRouteInfo::select('client_route_info.date','client_route_info.city_id','city.grace_period', 'city.max_month_show as max_month_show')
                 ->join('city','city.id','client_route_info.city_id')
                 ->where('client_route_info.status', '=', 1)
                 ->orderBy('city.name')
@@ -807,12 +808,12 @@ class CrmRouteController extends Controller
 
     public function findCityByDistanceWithDistanceLimit($city, $currentDate,$clientRoutesInfoWithUsedCities,$cities, $limit){
         if($limit == 'infinity'){
-            $voievodeshipRound = Cities::select(DB::raw('voivodeship.id as id,voivodeship.name,city.name as city_name,city.id as city_id, city.max_hour as max_hour'))
+            $voievodeshipRound = Cities::select(DB::raw('voivodeship.id as id,voivodeship.name,city.name as city_name,city.id as city_id, city.max_hour as max_hour', 'city.max_month_show as max_month_show'))
                 ->join('voivodeship', 'voivodeship.id', 'city.voivodeship_id')
                 ->orderBy('city.name')
                 ->get();
         }else {
-            $voievodeshipRound = Cities::select(DB::raw('voivodeship.id as id,voivodeship.name,city.name as city_name,city.id as city_id, city.max_hour as max_hour,
+            $voievodeshipRound = Cities::select(DB::raw('voivodeship.id as id,voivodeship.name,city.name as city_name,city.id as city_id, city.max_hour as max_hour, city.max_month_show as max_month_show,
             ( 3959 * acos ( cos ( radians(' . $city->latitude . ') ) * cos( radians( `latitude` ) )
              * cos( radians( `longitude` ) - radians(' . $city->longitude . ') ) + sin ( radians(' . $city->latitude . ') )
               * sin( radians( `latitude` ) ) ) ) * 1.60 AS distance'))
@@ -848,7 +849,23 @@ class CrmRouteController extends Controller
                     array_push($checkedCities, $cityInfoObject);
                 }
             }
-            $voievodeshipRound->map(function($item) use($checkedCities){
+            $voievodeshipRound->map(function($item) use($checkedCities, $currentDate){
+
+                $firstDayOfThisMonth = date('Y-m-01', strtotime($currentDate));
+                $lastDayOfThisMonth = date('Y-m-t', strtotime($currentDate));
+                $allRecordsFromClientRouteInfo = ClientRouteInfo::where('city_id', '=', $item->city_id)
+                    ->where('client_route_info.status', '=', 1)
+                    ->whereBetween('client_route_info.date', [$firstDayOfThisMonth, $lastDayOfThisMonth])
+                    ->get();
+
+                $numberOfRecords = $allRecordsFromClientRouteInfo->count();
+                if($numberOfRecords > $item->max_month_show) {
+                    $item->max_month_exceeded = 1;
+                }
+                else {
+                    $item->max_month_exceeded = 0;
+                }
+
                 $hourNumber = 0; //This variable counts how many times city was used in grace period
                 foreach($checkedCities as $cityRecords) {
                     if ($cityRecords->city_id == $item->city_id) {
@@ -936,6 +953,7 @@ class CrmRouteController extends Controller
                     'city.name as city_name',
                     'voivodeship.name as voivode_name'
                 )
+                ->where('cr.status', '=', 1)
                 ->where('cr.id', '=', $id)
                 ->where('client_route_info.status', '=', 1)
                 ->orderBy('date')->orderBy('show_order')->orderBy('client_route_info.id')->get();
@@ -998,6 +1016,7 @@ class CrmRouteController extends Controller
                 ->join('client_route', 'client_route.id', '=', 'client_route_info.client_route_id')
                 ->join('city', 'city.id', '=', 'client_route_info.city_id')
                 ->join('voivodeship', 'voivodeship.id', '=', 'client_route_info.voivode_id')
+                ->where('client_route.status', '=', 1)
                 ->where('client_route_id', '=', $id)
                 ->where('client_route_info.status', '=', 1)
                 ->get();
@@ -1266,6 +1285,7 @@ class CrmRouteController extends Controller
                 client.id as id,
                 client.name as name'))
             ->join('client', 'client.id', '=', 'client_route.client_id')
+            ->where('client_route.status', '=', 1)
             ->distinct()
             ->get();
 
@@ -1310,6 +1330,7 @@ class CrmRouteController extends Controller
             ->join('client_route' ,'client_route.id','=','client_route_id')
             ->join('client' ,'client.id','=','client_route.client_id')
             ->join('city' ,'city.id','=', 'city_id')
+            ->where('client_route.status', '=', 1)
             ->where('client_route.client_id','like',$clientId)
             ->where('client_route_info.status', '=', 1)
             ->where('date', 'like', $year . '%')
@@ -1620,7 +1641,7 @@ class CrmRouteController extends Controller
 //                ->toArray();
 
             //Rekordy clientRoutesInfo w których były użyte miasta
-            $clientRoutesInfoWithUsedCities = ClientRouteInfo::select('client_route_info.date','client_route_info.city_id','city.grace_period')
+            $clientRoutesInfoWithUsedCities = ClientRouteInfo::select('client_route_info.date','client_route_info.city_id','city.grace_period', 'city.max_month_show as max_month_show')
                 ->join('city','city.id','client_route_info.city_id')
                 ->where('client_route_info.status', '=', 1)
                 ->orderBy('city.name')
@@ -1655,7 +1676,26 @@ class CrmRouteController extends Controller
                 }
 
             }
-            $all_cities->map(function($item) use($checkedCities){
+//            dd($all_cities->pluck('max_month_show'));
+            $all_cities->map(function($item) use($checkedCities, $currentDate){
+
+                $firstDayOfThisMonth = date('Y-m-01', strtotime($currentDate));
+
+                $lastDayOfThisMonth = date('Y-m-t', strtotime($currentDate));
+
+                $allRecordsFromClientRouteInfo = ClientRouteInfo::where('city_id', '=', $item->id)
+                    ->where('client_route_info.status', '=', 1)
+                    ->whereBetween('client_route_info.date', [$firstDayOfThisMonth, $lastDayOfThisMonth])
+                    ->get();
+
+                $numberOfRecords = $allRecordsFromClientRouteInfo->count();
+                if($numberOfRecords > $item->max_month_show) {
+                    $item->max_month_exceeded = 1;
+                }
+                else {
+                    $item->max_month_exceeded = 0;
+                }
+
                 $hourNumber = 0; //This variable counts how many times city was used in grace period
                 foreach($checkedCities as $cityRecords) {
                     if ($cityRecords->city_id == $item->id) {
@@ -1666,6 +1706,7 @@ class CrmRouteController extends Controller
                 $blockFlag = false;
                 foreach($checkedCities as $blockedCity) {
                     if($blockedCity->city_id == $item->id) {
+
                         $blockFlag = true;
                         $item->block = 1;
                         $item->available_date = $blockedCity->available_date;
@@ -1780,7 +1821,7 @@ class CrmRouteController extends Controller
             ['status', '=', 1]
         ])->get();
         $cities = Cities::all();
-        $clientRouteInfo = ClientRouteInfo::select('client_route_info.date','client_route_info.city_id','city.grace_period')
+        $clientRouteInfo = ClientRouteInfo::select('client_route_info.date','client_route_info.city_id','city.grace_period', 'city.max_month_show as max_month_show')
             ->join('city','city.id','client_route_info.city_id')
             ->where('client_route_info.status', '=', 1)
             ->get();
@@ -2008,11 +2049,11 @@ class CrmRouteController extends Controller
     public function findCityByDistance($city, $currentDate,$clientRoutesInfoWithUsedCities,$cities, $removeLimit = false){
         $distance = 100;
         if($removeLimit){
-            $voievodeshipRound = Cities::select(DB::raw('voivodeship.id as id,voivodeship.name,city.name as city_name,city.id as city_id, city.max_hour as max_hour'))
+            $voievodeshipRound = Cities::select(DB::raw('voivodeship.id as id,voivodeship.name,city.name as city_name,city.id as city_id, city.max_hour as max_hour', 'city.max_month_show as max_month_show'))
                 ->join('voivodeship', 'voivodeship.id', 'city.voivodeship_id')
                 ->get();
         }else {
-            $voievodeshipRound = Cities::select(DB::raw('voivodeship.id as id,voivodeship.name,city.name as city_name,city.id as city_id, city.max_hour as max_hour,
+            $voievodeshipRound = Cities::select(DB::raw('voivodeship.id as id,voivodeship.name,city.name as city_name,city.id as city_id, city.max_hour as max_hour, city.max_month_show as max_month_show,
             ( 3959 * acos ( cos ( radians(' . $city->latitude . ') ) * cos( radians( `latitude` ) )
              * cos( radians( `longitude` ) - radians(' . $city->longitude . ') ) + sin ( radians(' . $city->latitude . ') )
               * sin( radians( `latitude` ) ) ) ) * 1.60 AS distance'))
@@ -2047,7 +2088,22 @@ class CrmRouteController extends Controller
                         array_push($checkedCities, $cityInfoObject);
                 }
             }
-            $voievodeshipRound->map(function($item) use($checkedCities){
+            $voievodeshipRound->map(function($item) use($checkedCities, $currentDate){
+                $firstDayOfThisMonth = date('Y-m-01', strtotime($currentDate));
+                $lastDayOfThisMonth = date('Y-m-t', strtotime($currentDate));
+                $allRecordsFromClientRouteInfo = ClientRouteInfo::where('city_id', '=', $item->city_id)
+                    ->where('client_route_info.status', '=', 1)
+                    ->whereBetween('client_route_info.date', [$firstDayOfThisMonth, $lastDayOfThisMonth])
+                    ->get();
+
+                $numberOfRecords = $allRecordsFromClientRouteInfo->count();
+                if($numberOfRecords > $item->max_month_show) {
+                    $item->max_month_exceeded = 1;
+                }
+                else {
+                    $item->max_month_exceeded = 0;
+                }
+
                 $hourNumber = 0; //This variable counts how many times city was used in grace period
                 foreach($checkedCities as $cityRecords) {
                     if ($cityRecords->city_id == $item->city_id) {
@@ -2104,7 +2160,7 @@ class CrmRouteController extends Controller
             $cities = Cities::all();
             $city = Cities::where('id', '=', $cityId)->first();
             //part responsible for grace period
-            $clientRouteInfoAll = ClientRouteInfo::select('client_route_info.date','client_route_info.city_id','city.grace_period')
+            $clientRouteInfoAll = ClientRouteInfo::select('client_route_info.date','client_route_info.city_id','city.grace_period', 'city.max_month_show as max_month_show')
                 ->join('city','city.id','client_route_info.city_id')
                 ->where('client_route_info.status', '=', 1)
                 ->get();
@@ -2670,7 +2726,7 @@ class CrmRouteController extends Controller
         $startDate  = $request->startDate;
         $stopDate   = $request->stopDate;
         $actualDate = $startDate;
-        $allInfoCollect = collect();
+        $aheadPlanningData = collect();
 
         $routeInfoOverall = ClientRouteInfo::select(DB::raw('
             date,
@@ -2681,6 +2737,8 @@ class CrmRouteController extends Controller
             ->where('client_route_info.status', '=', 1)
             ->groupBy('date', 'department_info_id')
             ->get();
+
+        //dd();
 
         while($actualDate <= $stopDate){
             $dayCollect = collect();
@@ -2713,12 +2771,79 @@ class CrmRouteController extends Controller
                 $allSet = "Tak";
             $dayCollect->offsetSet('allSet',$allSet);
             $dayCollect->offsetSet('totalScore',$totalScore);
-            $allInfoCollect->push($dayCollect);
+            $aheadPlanningData->push($dayCollect);
             $actualDate = date('Y-m-d', strtotime($actualDate. ' + 1 days'));
         }
-        return datatables($allInfoCollect)->make(true);
+        $departmentsInvitationsAverages = $request->departmentsInvitationsAverages;
+        if($departmentsInvitationsAverages == null){
+            $stopDate = date('Y-m-d');
+            $startDate = date('Y-m-d', strtotime($stopDate. ' - 14 days'));
+            $departmentsInvitationsAverages = $this->getDepartmentsInvitationsAverages($startDate,$stopDate,$routeInfoOverall,$departmentInfo);
+        }
+        $allInfoCollect = collect();
+        $allInfoCollect->offsetSet('aheadPlanningData', $aheadPlanningData);
+        $allInfoCollect->offsetSet('departmentsInvitationsAveragesData',$departmentsInvitationsAverages);
+        return $allInfoCollect;
     }
 
+    public function getDepartmentsInvitationsAverages($startDate, $stopDate, $routeInfoOverall, $departmentInfo){
+        $departmentsInvitationsAveragesInfo = collect();
+        foreach ($departmentInfo as $item) {
+            $actualDate = $startDate;
+            $weekSum = 0;
+            $weekDivider = 0;
+
+            $saturdaySum = 0;
+            $saturdayDivider = 0;
+
+            $sundaySum = 0;
+            $sundayDivider = 0;
+            while ($actualDate < $stopDate) {
+                $routeInfo = $routeInfoOverall->where('department_info_id' ,'=', $item->id)
+                    ->where('date', '=', $actualDate)
+                    ->first();
+                if($routeInfo['sumOfActualSuccess'] != 0){
+                    if(date('N',strtotime($actualDate)) <6){
+                        $weekSum += $routeInfo['sumOfActualSuccess'];
+                        $weekDivider++;
+                    } else if (date('N', strtotime($actualDate)) == 6) {
+                        $saturdaySum += $routeInfo['sumOfActualSuccess'];
+                        $saturdayDivider++;
+                    } else if (date('N', strtotime($actualDate)) == 7) {
+                        $sundaySum += $routeInfo['sumOfActualSuccess'];
+                        $sundayDivider++;
+                    }
+                }
+
+                $actualDate = date('Y-m-d', strtotime($actualDate. ' + 1 days'));
+            }
+
+            $departmentAverages = collect();
+            $average = 0;
+            if($weekDivider != 0){
+                $average = $weekSum / $weekDivider;
+            }
+            $departmentAverages->offsetSet('week',floor($average));
+
+            if($saturdayDivider != 0){
+                $average = $saturdaySum / $saturdayDivider;
+            }else{
+                $average = $average*95/100;
+            }
+            $departmentAverages->offsetSet('saturday',floor($average));
+
+            if($sundayDivider != 0){
+                $average = $sundaySum / $sundayDivider;
+            }else{
+                $average = $average*80/100;
+            }
+            $departmentAverages->offsetSet('sunday',floor($average));
+
+            $departmentsInvitationsAveragesInfo->offsetSet($item->name2, $departmentAverages);
+        }
+
+        return $departmentsInvitationsAveragesInfo;
+    }
     public function getNameOfWeek($date){
         $arrayOfWeekName = [
             '1' => 'Poniedziałek',
@@ -2746,6 +2871,7 @@ class CrmRouteController extends Controller
             join('client_route','client_route.id','client_route_info.client_route_id')
             ->where('date','like',$actualMonth.'%')
             ->where('client_route_info.status', '=', 1)
+            ->where('client_route.status', '=', 1)
             ->groupBy('client_route.client_id')
             ->get()
             ->pluck('client_id')->toArray();
@@ -2762,6 +2888,7 @@ class CrmRouteController extends Controller
                 '))
             ->join('client_route','client_route.client_id','client.id')
             ->join('client_route_info','client_route_info.client_route_id','client_route.id')
+            ->where('client_route.status', '=', 1)
             ->where('client_route_info.status', '=', 1)
             ->whereIn('client.id',$actualClientsId)
             ->whereBetween('client_route_info.date',[$split_month[0]->date,$split_month[count($split_month)-1]->date])
@@ -2917,6 +3044,7 @@ class CrmRouteController extends Controller
         join('client_route','client_route.id','client_route_info.client_route_id')
             ->where('date','like',$actualMonth.'%')
             ->where('client_route_info.status', '=', 1)
+            ->where('client_route.status', '=', 1)
             ->groupBy('client_route.client_id')
             ->get()
             ->pluck('client_id')->toArray();
@@ -2933,6 +3061,7 @@ class CrmRouteController extends Controller
                 '))
             ->join('client_route','client_route.client_id','client.id')
             ->join('client_route_info','client_route_info.client_route_id','client_route.id')
+            ->where('client_route.status', '=', 1)
             ->where('client_route_info.status', '=', 1)
             ->whereIn('client.id',$actualClientsId)
             ->whereBetween('client_route_info.date',[$split_month[0]->date,$split_month[count($split_month)-1]->date])
@@ -3206,6 +3335,7 @@ class CrmRouteController extends Controller
             ->join('city', 'city.id', '=', 'client_route_info.city_id')
             ->join('hotels', 'hotels.id','=','hotel_id')
             ->where('client_route_info.status', '=', 1)
+            ->where('client_route.status', '=', 1)
             ->whereBetween('client_route_info.date', [$request->dateStart, $request->dateStop]);
 
         if($request->clients[0] != 0) {
@@ -3346,6 +3476,7 @@ class CrmRouteController extends Controller
             ->join('hotels as h','cri.hotel_id','=','h.id')
             ->join('client_route as cr','cri.client_route_id','=','cr.id')
             ->join('client as c','cr.client_id','=','c.id')
+            ->where('cr.status', '=', 1)
             ->where('cri.status', '=', 1);
         if ($routeId > 0) {
             $clientRouteCampaigns->where('cri.client_route_id', '=', $routeId);
@@ -3483,6 +3614,7 @@ class CrmRouteController extends Controller
             ->leftjoin('hotels','hotels.id','client_route_info.hotel_id')
             ->leftjoin('payment_methods','payment_methods.id','hotels.payment_method_id')
             ->leftjoin('city','city.id','hotels.city_id')
+            ->where('client_route.status', '=', 1)
             ->where('client_route.client_id','=',$clientID)
             ->where('client_route_info.weekOfYear','like',$selectedWeek)
             ->where('client_route_info.status', '=', 1)
@@ -3531,6 +3663,7 @@ class CrmRouteController extends Controller
             ->join('client_route_info','client_route_info.id','client_route_campaigns.client_route_info_id')
             ->join('client_route','client_route.id','client_route_info.client_route_id')
             ->join('client','client.id','client_route.client_id')
+            ->where('client_route.status', '=', 1)
             ->where('client_route_info.status', '=', 1)
             ->get();
         return view('crmRoute.hotelConfirmation')
@@ -3564,6 +3697,7 @@ class CrmRouteController extends Controller
             ->join('client','client.id','client_route.client_id')
             ->leftjoin('hotels','hotels.id','client_route_info.hotel_id')
             ->leftjoin('city','city.id','hotels.city_id')
+            ->where('client_route.status', '=', 1)
             ->where('client_route_info.date','like',$dayPlus)
             ->where('client_route_info.status', '=', 1)
             ->where('client.id','like',$clientID)
@@ -3731,6 +3865,11 @@ class CrmRouteController extends Controller
             }
         }
         return '1';
+    }
+
+    //This method changes clientRoute status to 0 (inactive);
+    public function deleteGivenRouteAjax($id, Request $request) {
+        return ClientRoute::where('id', '=', $id)->update(['status' => 0]);
     }
 
 }
