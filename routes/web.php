@@ -337,7 +337,7 @@ Route::get('/invoices', 'CrmRouteController@invoicesMail');
 //Gniezno
 Route::get('/hourReportTelemarketingGniezno', 'OtherCompanyStatisticsController@MailhourReportTelemarketing'); // ok
 Route::get('/weekReportTelemarketingGniezno', 'OtherCompanyStatisticsController@MailweekReportTelemarketing'); // ok
-Route::get('/monthReportTelemarketingGniezno', 'OtherCompanyStatisticsController@MailmonthReportTelemarketing'); // ok
+Route::get('/monthReportTelemarketingGnhaiezno', 'OtherCompanyStatisticsController@MailmonthReportTelemarketing'); // ok
 Route::get('/dayReportTelemarketingGniezno', 'OtherCompanyStatisticsController@MailDayReportTelemarketing'); // tutaj dodac
 
 
@@ -721,10 +721,11 @@ Route::middleware(['check-permission', 'check-firewall'])->group(function () {
     Route::post('/pageMonthReportCoachRankingOrderable', 'StatisticsController@pageMonthReportCoachRankingOrderablePost');
 
     //Raporty Rekrutacji
-
     //Dzienny
     Route::get('/pageDayReportRecruitmentFlow', 'StatisticsController@pageDayReportRecruitmentFlow');
     Route::post('/pageDayReportRecruitmentFlow', 'StatisticsController@pageDayReportRecruitmentFlowPost');
+    Route::get('/pageDayReportRecruitmentTrainingGroupFirstAndHire', 'StatisticsController@pageDayReportRecruitmentTrainingGroupFirstAndHireGET');
+    Route::post('/pageDayReportRecruitmentTrainingGroupFirstAndHire', 'StatisticsController@pageDayReportRecruitmentTrainingGroupFirstAndHirePOST');
     Route::get('/pageDayReportRecruitmentTrainingGroup', 'StatisticsController@pageDayReportTrainingGroup');
     Route::post('/pageDayReportRecruitmentTrainingGroup', 'StatisticsController@pageDayReportTrainingGroupPost');
     Route::get('/pageDayReportInterviews', 'StatisticsController@pageDayReportInterviews');
@@ -740,6 +741,9 @@ Route::middleware(['check-permission', 'check-firewall'])->group(function () {
     Route::post('/pageWeekReportInterviews', 'StatisticsController@pageWeekReportInterviewsPost');
     Route::get('/pageWeekReportHireCandidate', 'StatisticsController@pageWeekReportHireCandidate');
     Route::post('/pageWeekReportHireCandidate', 'StatisticsController@pageWeekReportHireCandidatePost');
+    Route::get('/pageWeekReportRecruitmentTrainingGroupFirstAndHire', 'StatisticsController@pageWeekReportRecruitmentTrainingGroupFirstAndHireGET');
+    Route::post('/pageWeekReportRecruitmentTrainingGroupFirstAndHire', 'StatisticsController@pageWeekReportRecruitmentTrainingGroupFirstAndHirePOST');
+
     //Miesięczny
     Route::get('/pageMonthReportRecruitmentFlow', 'StatisticsController@pageMonthReportRecruitmentFlow');
     Route::post('/pageMonthReportRecruitmentFlow', 'StatisticsController@pageMonthReportRecruitmentFlowPost');
@@ -749,6 +753,8 @@ Route::middleware(['check-permission', 'check-firewall'])->group(function () {
     Route::post('/pageMonthReportInterviews', 'StatisticsController@pageMonthReportInterviewsPost');
     Route::get('/pageMonthReportHireCandidate', 'StatisticsController@pageMonthReportHireCandidate');
     Route::post('/pageMonthReportHireCandidate', 'StatisticsController@pageMonthReportHireCandidatePost');
+    Route::get('/pageMonthReportRecruitmentTrainingGroupFirstAndHire', 'StatisticsController@pageMonthReportRecruitmentTrainingGroupFirstAndHireGET');
+    Route::post('/pageMonthReportRecruitmentTrainingGroupFirstAndHire', 'StatisticsController@pageMonthReportRecruitmentTrainingGroupFirstAndHirePOST');
 
 
     //Raport Usunietych kont
@@ -995,3 +1001,4 @@ Route::get('/checkPenatly', 'AutoScriptController@checkPenatly');
 Route::POST('/clientReport', 'CrmRouteController@clientReport')->name('api.clientReport');
 
 Route::post('/changeLimits', 'CrmRouteController@changeLimitsAjax')->name('api.changeLimits');
+

@@ -1565,6 +1565,233 @@ class StatisticsController extends Controller
         $this->sendMailByVerona('recruitmentMail.monthReportRecruitmentFlow', $data, $title);
     }
 
+    /**
+     * Wyświetlanie przeprowadzonych szkoleń Dzienny / Ilość osób zatrudnionych po szkoleniu
+     */
+    public function pageDayReportRecruitmentTrainingGroupFirstAndHireGET(){
+        $date_start = date('Y-m-d');
+        $date_stop = date('Y-m-d');
+        $dateHireCandidate = RecruitmentStory::getReportTrainingDataAndHire($date_start,$date_stop);
+        $date =  RecruitmentStory::getReportTrainingData($date_start,$date_stop);
+        $date = $date->map(function ($item) use($dateHireCandidate) {
+            $dateHireCandidateDepartment = $dateHireCandidate->where('departmentInfoId',$item->dep_id);
+
+            if(!$dateHireCandidateDepartment->isEmpty()){
+                $item->countHireUserFromFirstTrainingGroup = $dateHireCandidateDepartment->count();
+            }
+            return $item;
+        });
+        return view('reportpage.recruitmentReport.DayReportRecruitmentTrainingGroupFirstAndHire')
+            ->with([
+                'data' => $date,
+                'start_date' => $date_start
+            ]);
+    }
+    /**
+     * Wyświetlanie przeprowadzonych szkoleń Dzienny / Ilość osób zatrudnionych po szkoleniu
+     */
+    public function pageDayReportRecruitmentTrainingGroupFirstAndHirePOST(Request $request){
+        $date = $request->date;
+        $date_start = $date;
+        $date_stop = $date;
+        $dateHireCandidate = RecruitmentStory::getReportTrainingDataAndHire($date_start,$date_stop);
+        $date =  RecruitmentStory::getReportTrainingData($date_start,$date_stop);
+        $date = $date->map(function ($item) use($dateHireCandidate) {
+            $dateHireCandidateDepartment = $dateHireCandidate->where('departmentInfoId',$item->dep_id);
+
+            if(!$dateHireCandidateDepartment->isEmpty()){
+                $item->countHireUserFromFirstTrainingGroup = $dateHireCandidateDepartment->count();
+            }
+            return $item;
+        });
+        return view('reportpage.recruitmentReport.DayReportRecruitmentTrainingGroupFirstAndHire')
+            ->with([
+                'data' => $date,
+                'start_date' => $date_start
+            ]);
+    }
+
+    /**
+     * Mail Wyświetlanie przeprowadzonych szkoleń Dzienny / Ilość osób zatrudnionych po szkoleniu
+     */
+    public function MaildayReportRecruitmentTrainingGroupFirstAndHire() {
+        $date_start = date('Y-m-d', time() - 24 * 3600);
+        $date_stop = date('Y-m-d', time() - 24 * 3600);
+        $dateHireCandidate = RecruitmentStory::getReportTrainingDataAndHire($date_start,$date_stop);
+        $date =  RecruitmentStory::getReportTrainingData($date_start,$date_stop);
+        $date = $date->map(function ($item) use($dateHireCandidate) {
+            $dateHireCandidateDepartment = $dateHireCandidate->where('departmentInfoId',$item->dep_id);
+            if(!$dateHireCandidateDepartment->isEmpty()){
+                $item->countHireUserFromFirstTrainingGroup = $dateHireCandidateDepartment->count();
+            }
+            return $item;
+        });
+        $data = [
+            'data' => $date,
+            'start_date' => $date_start
+        ];
+        $title = 'Raport Dzienny Szkoleń / Zatrudnionych kandydatów'. $date_start;
+        $this->sendMailByVerona('recruitmentMail.dayReportRecruitmentTrainingGroupFirstAndHire', $data, $title);
+    }
+
+
+    /**
+     * Wyświetlanie przeprowadzonych szkoleń Tygodniowy / Ilość osób zatrudnionych po szkoleniu
+     */
+    public function pageWeekReportRecruitmentTrainingGroupFirstAndHireGET(){
+        $date_start = date("Y-m-d",strtotime('-7 Days'));
+        $date_stop = date("Y-m-d",strtotime('-1 Day'));
+        $dateHireCandidate = RecruitmentStory::getReportTrainingDataAndHire($date_start,$date_stop);
+        $date =  RecruitmentStory::getReportTrainingData($date_start,$date_stop);
+        $date = $date->map(function ($item) use($dateHireCandidate) {
+            $dateHireCandidateDepartment = $dateHireCandidate->where('departmentInfoId',$item->dep_id);
+
+            if(!$dateHireCandidateDepartment->isEmpty()){
+                $item->countHireUserFromFirstTrainingGroup = $dateHireCandidateDepartment->count();
+            }
+            return $item;
+        });
+        return view('reportpage.recruitmentReport.WeekReportRecruitmentTrainingGroupFirstAndHire')
+            ->with([
+                'data' => $date,
+                'start_date' => $date_start,
+                'stop_date' => $date_stop
+            ]);
+    }
+
+    /**
+     * Wyświetlanie przeprowadzonych szkoleń Tygodniowy / Ilość osób zatrudnionych po szkoleniu
+     */
+    public function pageWeekReportRecruitmentTrainingGroupFirstAndHirePOST(Request $request){
+        $date_start = $request->date_start;
+        $date_stop = $request->date_stop;
+        $dateHireCandidate = RecruitmentStory::getReportTrainingDataAndHire($date_start,$date_stop);
+        $date =  RecruitmentStory::getReportTrainingData($date_start,$date_stop);
+        $date = $date->map(function ($item) use($dateHireCandidate) {
+            $dateHireCandidateDepartment = $dateHireCandidate->where('departmentInfoId',$item->dep_id);
+
+            if(!$dateHireCandidateDepartment->isEmpty()){
+                $item->countHireUserFromFirstTrainingGroup = $dateHireCandidateDepartment->count();
+            }
+            return $item;
+        });
+        return view('reportpage.recruitmentReport.WeekReportRecruitmentTrainingGroupFirstAndHire')
+            ->with([
+                'data' => $date,
+                'start_date' => $date_start,
+                'stop_date' => $date_stop
+            ]);
+    }
+
+    /**
+     * Wyświetlanie przeprowadzonych szkoleń Tygodniowy / Ilość osób zatrudnionych po szkoleniu
+     */
+    public function MailweekReportRecruitmentTrainingGroupFirstAndHire(){
+        $date_start = date("Y-m-d",strtotime('-7 Days'));
+        $date_stop = date("Y-m-d",strtotime('-1 Day'));
+        $dateHireCandidate = RecruitmentStory::getReportTrainingDataAndHire($date_start,$date_stop);
+        $date =  RecruitmentStory::getReportTrainingData($date_start,$date_stop);
+        $date = $date->map(function ($item) use($dateHireCandidate) {
+            $dateHireCandidateDepartment = $dateHireCandidate->where('departmentInfoId',$item->dep_id);
+
+            if(!$dateHireCandidateDepartment->isEmpty()){
+                $item->countHireUserFromFirstTrainingGroup = $dateHireCandidateDepartment->count();
+            }
+            return $item;
+        });
+        $data = [
+            'data' => $date,
+            'start_date' => $date_start,
+            'stop_date' => $date_stop
+        ];
+        $title = 'Raport Tygodniowy Szkoleń / Zatrudnionych kandydatów'. $date_start;
+        $this->sendMailByVerona('recruitmentMail.weekReportRecruitmentTrainingGroupFirstAndHire', $data, $title);
+    }
+
+
+
+
+    /**
+     * Wyświetlanie przeprowadzonych szkoleń Tygodniowy / Ilość osób zatrudnionych po szkoleniu
+     */
+    public function pageMonthReportRecruitmentTrainingGroupFirstAndHireGET(){
+        $month_ini = new DateTime("first day of this month");
+        $month_end = new DateTime("last day of this month");
+        $date_start =  $month_ini->format('Y-m-d');
+        $date_stop  = $month_end->format('Y-m-d');
+        $dateHireCandidate = RecruitmentStory::getReportTrainingDataAndHire($date_start,$date_stop);
+        $date =  RecruitmentStory::getReportTrainingData($date_start,$date_stop);
+        $date = $date->map(function ($item) use($dateHireCandidate) {
+            $dateHireCandidateDepartment = $dateHireCandidate->where('departmentInfoId',$item->dep_id);
+
+            if(!$dateHireCandidateDepartment->isEmpty()){
+                $item->countHireUserFromFirstTrainingGroup = $dateHireCandidateDepartment->count();
+            }
+            return $item;
+        });
+        return view('reportpage.recruitmentReport.MonthReportRecruitmentTrainingGroupFirstAndHire')
+            ->with([
+                'data' => $date,
+                'start_date' => $date_start,
+                'stop_date' => $date_stop
+            ]);
+    }
+
+    /**
+     * Wyświetlanie przeprowadzonych szkoleń Tygodniowy / Ilość osób zatrudnionych po szkoleniu
+     */
+    public function pageMonthReportRecruitmentTrainingGroupFirstAndHirePOST(Request $request){
+        $date_start = $request->date_start;
+        $date_stop = $request->date_stop;
+        $dateHireCandidate = RecruitmentStory::getReportTrainingDataAndHire($date_start,$date_stop);
+        $date =  RecruitmentStory::getReportTrainingData($date_start,$date_stop);
+        $date = $date->map(function ($item) use($dateHireCandidate) {
+            $dateHireCandidateDepartment = $dateHireCandidate->where('departmentInfoId',$item->dep_id);
+
+            if(!$dateHireCandidateDepartment->isEmpty()){
+                $item->countHireUserFromFirstTrainingGroup = $dateHireCandidateDepartment->count();
+            }
+            $item->procScore = $item->sum_choise_stageOne != 0 ? round(($item->countHireUserFromFirstTrainingGroup/$item->sum_choise_stageOne)*100,2) : 0;
+            return $item;
+        })->sortByDesc('procScore');
+        return view('reportpage.recruitmentReport.MonthReportRecruitmentTrainingGroupFirstAndHire')
+            ->with([
+                'data' => $date,
+                'start_date' => $date_start,
+                'stop_date' => $date_stop
+            ]);
+    }
+
+    /**
+     * Wyświetlanie przeprowadzonych szkoleń Tygodniowy / Ilość osób zatrudnionych po szkoleniu
+     */
+    public function MailmonthReportRecruitmentTrainingGroupFirstAndHire(){
+        $month_ini = new DateTime("first day of this month");
+        $month_end = new DateTime("last day of this month");
+        $date_start =  $month_ini->format('Y-m-d');
+        $date_stop  = $month_end->format('Y-m-d');
+        $dateHireCandidate = RecruitmentStory::getReportTrainingDataAndHire($date_start,$date_stop);
+        $date =  RecruitmentStory::getReportTrainingData($date_start,$date_stop);
+        $date = $date->map(function ($item) use($dateHireCandidate) {
+            $dateHireCandidateDepartment = $dateHireCandidate->where('departmentInfoId',$item->dep_id);
+
+            if(!$dateHireCandidateDepartment->isEmpty()){
+                $item->countHireUserFromFirstTrainingGroup = $dateHireCandidateDepartment->count();
+            }
+            return $item;
+        });
+        $data = [
+            'data' => $date,
+            'start_date' => $date_start,
+            'stop_date' => $date_stop
+        ];
+        $title = 'Raport Miesięcznu Szkoleń / Zatrudnionych kandydatów'. $date_start;
+        $this->sendMailByVerona('recruitmentMail.monthReportRecruitmentTrainingGroupFirstAndHire', $data, $title);
+    }
+
+
+
+
 
     /**
      * Wyświetlanie przeprowadzonych szkoleń Dzienny
