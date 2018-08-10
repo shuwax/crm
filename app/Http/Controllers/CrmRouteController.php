@@ -3352,7 +3352,7 @@ class CrmRouteController extends Controller
             ->join('client_route', 'client_route.id', '=', 'client_route_info.client_route_id')
             ->join('client','client.id','=','client_route.client_id')
             ->join('city', 'city.id', '=', 'client_route_info.city_id')
-            ->join('hotels', 'hotels.id','=','hotel_id')
+            ->leftjoin('hotels', 'hotels.id','=','hotel_id')
             ->where('client_route_info.status', '=', 1)
             ->where('client_route.status', '=', 1)
             ->whereBetween('client_route_info.date', [$request->dateStart, $request->dateStop]);
@@ -3360,6 +3360,8 @@ class CrmRouteController extends Controller
         if($request->clients[0] != 0) {
             $clientRouteInfo = $clientRouteInfo->whereIn('client.id', $request->clients);
         }
+        if($request->showWithoutHotelInput == 'true')
+            $clientRouteInfo = $clientRouteInfo->where('hotels.name',null);
         return datatables($clientRouteInfo->get())->make(true);
     }
 

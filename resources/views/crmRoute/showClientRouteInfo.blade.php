@@ -28,6 +28,12 @@
         </div>
 
             <div class="row">
+                <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="showWithoutHotel">Pokazy bez hoteli</label>
+                            <input type="checkbox" style="display:inline-block" id="showWithoutHotel">
+                        </div>
+                </div>
                 <div class="col-md-3">
                     <label for="date_start">Data początkowa:</label>
                     <input type="date" id="date_start" style="width: 100%;" class="form-control">
@@ -89,7 +95,7 @@
         const month = ("0" + (now.getMonth() + 1)).slice(-2);
         const today = now.getFullYear() + "-" + (month) + "-" + (day);
         const firstDayOfThisMonth = now.getFullYear() + "-" + (month) + "-01";
-
+        const showWithoutHotelInput = $('#showWithoutHotel');
         /*Activation selectpicker and datetimepicker framework*/
         (function initial() {
             $('.selectpicker').selectpicker({
@@ -114,6 +120,7 @@
                     d.dateStop = $('#date_stop').val();
                     d.dateStart = $('#date_start').val();
                     d.clients = $('#clients').val();
+                    d.showWithoutHotelInput = showWithoutHotelInput.prop('checked');
                 },
                 headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}
             },
@@ -134,7 +141,9 @@
         $('#menu-toggle').change(()=>{
             table.columns.adjust().draw();
         });
-
+        showWithoutHotelInput.change(function(e){
+            table.ajax.reload();
+        });
         /**
          * This event listener reloads table after changing start or stop date
          */
