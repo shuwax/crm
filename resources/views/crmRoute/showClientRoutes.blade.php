@@ -179,21 +179,28 @@
                             </div>
                         </div>
 
-                        <div class="col-md-2">
-                            <div class="form-group" style="margin-top:2.6em; width: 100%;">
-                                <button id="limitsButton" class="btn btn-default" style="width:100%;" data-toggle="modal" data-target="#editModal" disabled="true">Edytuj limity</button>
-                            </div>
-                        </div>
 
-                        <div class="col-md-2">
-                            <button class="btn btn-basic" id="clearButton" style="width:100%; margin-top:2.6em;">
-                                <span class='glyphicon glyphicon-unchecked'></span>Czyść zaznaczone</button>
-                        </div>
 
                         <div class="col-md-2">
                             <div class="form-group" style="margin-top:2.6em;">
                                 <button class="btn btn-default" id="makeReportClient">Generuj Raport Klienta</button>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group" style="width: 100%;">
+                                <button id="limitsButton" class="btn btn-default" style="width:100%;" data-toggle="modal" data-target="#editModal" disabled="true">Edytuj limity</button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <button class="btn btn-basic" id="clearButton" style="width:100%;">
+                                <span class='glyphicon glyphicon-unchecked'></span>Czyść zaznaczone</button>
                         </div>
                     </div>
 

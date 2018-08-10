@@ -191,6 +191,7 @@ class ClientController extends Controller
         }
     }
 
+
     /**
      * edit Meeting
      * @param Request $request
