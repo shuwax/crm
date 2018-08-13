@@ -3371,7 +3371,12 @@ class CrmRouteController extends Controller
             ->leftjoin('hotels', 'hotels.id','=','hotel_id')
             ->where('client_route_info.status', '=', 1)
             ->where('client_route.status', '=', 1)
-            ->whereBetween('client_route_info.date', [$request->dateStart, $request->dateStop]);
+            ->whereBetween('client_route_info.date', [$request->dateStart, $request->dateStop])
+            ->orderby('weekOfYear','ASC')
+            ->orderby('city.name','ASC')
+            ->orderby('date','ASC')
+            ->orderby('clientName','ASC')
+            ->orderby('hour','ASC');
 
         if($request->clients[0] != 0) {
             $clientRouteInfo = $clientRouteInfo->whereIn('client.id', $request->clients);
@@ -3379,7 +3384,6 @@ class CrmRouteController extends Controller
         if($request->showWithoutHotelInput == 'true')
             $clientRouteInfo = $clientRouteInfo->where('hotels.name',null);
         $clientRouteInfo = $clientRouteInfo->get();
-        $clientRouteInfo = $clientRouteInfo->sortby('id')->sortby('hour')->sortby('weekOfYear')->values()->toArray();
         return $clientRouteInfo;
 
     }
