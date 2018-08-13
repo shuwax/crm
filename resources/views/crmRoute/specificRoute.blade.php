@@ -71,14 +71,6 @@
                 </div>
             </div>
         </div>
-        <div class="client-container" style="width: 49%">
-            <div class="row">
-                <div class="col-lg-6" style="display:-webkit-box;">
-                    <label for="user_reservation" style="margin-right: 10px;">Osoba Rezerwująca : </label>
-                    <input id="user_reservation" name="user_reservation" type="text" class="form-control price-input" @if(!empty($pageInfo->userReservation)) value="{{$pageInfo->userReservation}}" @else value="Brak"@endif>
-                </div>
-            </div>
-        </div>
             @endif
     </div>
     @php
@@ -122,6 +114,19 @@
                         <tbody>
                         </tbody>
                     </table>
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <label for="user_reservation" style="margin-right: 10px;">Osoba Rezerwująca: </label>
+                            <input id="user_reservation" name="user_reservation" type="text" class="form-control price-input" @if(!empty($campaign[0]->user_reservation)) value="{{$campaign[0]->user_reservation}}" @else value="Brak"@endif>
+
+                        </div>
+                        <div class="col-lg-6">
+                            <label for="hotel-price" style="margin-right: 10px;">Cena za hotel: </label>
+                            <input id="hotel-price" name="hotel-price" type="text" class="form-control hotel-price-input" @if(!empty($campaign[0]->hotel_price)) value="{{$campaign[0]->hotel_price}}" @else value="0"@endif>
+                        </div>
+                    </div>
+
                     @foreach($campaign as $showHour)
                         <div class="form-group">
                             <label>Godzina pokazu nr. @php echo $i; @endphp</label>
@@ -291,7 +296,13 @@
 
                 campaignContainers.forEach(campaignContainer => {
                     const timeHotelArr = createTimeHotelArrayOfObjects(campaignContainer);
-                    const campaignObject = new CampaignObject(campaignContainer.querySelectorAll('.campaignDirstClientRouteInfoId')[0].value, timeHotelArr);
+
+                    const userReservationInput = campaignContainer.querySelector('#user_reservation');
+                    const userReservationVal = userReservationInput.value;
+                    const hotelPriceInput = campaignContainer.querySelector('#hotel-price');
+                    const hotelPriceVal = hotelPriceInput.value;
+
+                    const campaignObject = new CampaignObject(campaignContainer.querySelectorAll('.campaignDirstClientRouteInfoId')[0].value, timeHotelArr, userReservationVal, hotelPriceVal);
 
                     if(isValid === false) {
                         swal('Wypełnij wszystkie pola');
@@ -365,15 +376,17 @@
             submitButton.addEventListener('click', submitHandler);
 
             //This object will store every info about given campaign.
-            function CampaignObject(campaignFirstClientRouteInfoId, timeHotelArr) {
+            function CampaignObject(campaignFirstClientRouteInfoId, timeHotelArr, userReservation, hotelPrice) {
                 this.campaignFirstClientRouteInfoId = campaignFirstClientRouteInfoId;
                 this.timeHotelArr = timeHotelArr;
-                this.userReservation = document.getElementById('user_reservation').value;
+                this.userReservation = userReservation;
+                this.hotelPrice = hotelPrice;
                 this.pushJSON = function() {
                     let obj = {
                         campaignFirstClientRouteInfoId: this.campaignFirstClientRouteInfoId,
                         timeHotelArr: this.timeHotelArr,
-                        userReservation: this.userReservation
+                        userReservation: this.userReservation,
+                        hotelPrice: this.hotelPrice
                     };
                     campaignInfoArray.push(obj);
 

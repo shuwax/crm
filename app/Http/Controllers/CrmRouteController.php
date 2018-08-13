@@ -951,7 +951,8 @@ class CrmRouteController extends Controller
                     'hotel_id',
                     'hour',
                     'city.name as city_name',
-                    'voivodeship.name as voivode_name'
+                    'voivodeship.name as voivode_name',
+                    'hotel_price'
                 )
                 ->where('cr.status', '=', 1)
                 ->where('cr.id', '=', $id)
@@ -965,7 +966,8 @@ class CrmRouteController extends Controller
                     'routeName' => $clientRouteInfo[0]->route_name,
                     'week' => $clientRouteInfo[0]->week,
                     'date' => $clientRouteInfo[0]->date,
-                    'userReservation' => $clientRouteInfo[0]->user_reservation
+                    'user_reservation' => $clientRouteInfo[0]->user_reservation == 'Brak' ? '' : $clientRouteInfo[0]->user_reservation,
+                    'hotel_price' => $clientRouteInfo[0]->hotel_price == 0 ? null : $clientRouteInfo[0]->hotel_price,
                 ];
                 for ($i = 0; $i < $clientRouteInfo->count(); $i++) {
                     $campaign = [];
@@ -1012,7 +1014,8 @@ class CrmRouteController extends Controller
                 'client_route_info.date as date', 'client_route_info.hotel_id as hotel_id',
                 'client_route_info.hour as hour',
                 'client_route.client_id as client_id',
-                'client_route_info.weekOfYear as weekOfYear')
+                'client_route_info.weekOfYear as weekOfYear',
+                'client_route_info.hotel_price')
                 ->join('client_route', 'client_route.id', '=', 'client_route_info.client_route_id')
                 ->join('city', 'city.id', '=', 'client_route_info.city_id')
                 ->join('voivodeship', 'voivodeship.id', '=', 'client_route_info.voivode_id')
@@ -1115,20 +1118,33 @@ class CrmRouteController extends Controller
     /**
      * This method saves changes about specific route
      */
-    public function updateClientRouteInfoHotelsAndHours(Request $request){
+    public function updateClientRouteInfoHotelsAndHours(Request $request) {
         $all_data = json_decode($request->JSONData); //we obtain 3 dimensional array
         //dd($all_data);
         $clientRouteInfoIds = 'clientRouteInfoIds: ';
         foreach($all_data as $campaign) {
+            $lp = 1;
             foreach ($campaign->timeHotelArr as $clientRouteInfo){
                 try{
-                    ClientRouteInfo::where([
-                        ['id', '=', $clientRouteInfo->clientRouteInfoId]
-                    ])->update([
-                        'hotel_id' => $clientRouteInfo->hotelId,
-                        'hour' => $clientRouteInfo->time == "" ? null : $clientRouteInfo->time,
-                        'user_reservation' => $campaign->userReservation
-                    ]);
+                    if($lp == 1){
+                        ClientRouteInfo::where([
+                            ['id', '=', $clientRouteInfo->clientRouteInfoId]
+                        ])->update([
+                            'hotel_id' => $clientRouteInfo->hotelId,
+                            'hour' => $clientRouteInfo->time == "" ? null : $clientRouteInfo->time,
+                            'user_reservation' => $campaign->userReservation == 'Brak' ? '' : $campaign->userReservation,
+                            'hotel_price' => $campaign->hotelPrice == 0 ? null : $campaign->hotelPrice
+                        ]);
+                        $lp++;
+                    }
+                    else{
+                        ClientRouteInfo::where([
+                            ['id', '=', $clientRouteInfo->clientRouteInfoId]
+                        ])->update([
+                            'hotel_id' => $clientRouteInfo->hotelId,
+                            'hour' => $clientRouteInfo->time == "" ? null : $clientRouteInfo->time
+                        ]);
+                    }
                     $clientRouteInfoIds .= $clientRouteInfo->clientRouteInfoId . ', ';
                 }catch(\Exception $e){
                     return $e;
@@ -3342,6 +3358,8 @@ class CrmRouteController extends Controller
 
     public function datatableClientRouteInfoAjax(Request $request){
         $clientRouteInfo = ClientRouteInfo::select(
+            'client_route_info.id',
+            'client_route_info.hour',
             'client.name as clientName',
             'weekOfYear',
             'client_route_info.date',
@@ -3352,7 +3370,7 @@ class CrmRouteController extends Controller
             ->join('client_route', 'client_route.id', '=', 'client_route_info.client_route_id')
             ->join('client','client.id','=','client_route.client_id')
             ->join('city', 'city.id', '=', 'client_route_info.city_id')
-            ->join('hotels', 'hotels.id','=','hotel_id')
+            ->leftjoin('hotels', 'hotels.id','=','hotel_id')
             ->where('client_route_info.status', '=', 1)
             ->where('client_route.status', '=', 1)
             ->whereBetween('client_route_info.date', [$request->dateStart, $request->dateStop]);
@@ -3360,7 +3378,12 @@ class CrmRouteController extends Controller
         if($request->clients[0] != 0) {
             $clientRouteInfo = $clientRouteInfo->whereIn('client.id', $request->clients);
         }
-        return datatables($clientRouteInfo->get())->make(true);
+        if($request->showWithoutHotelInput == 'true')
+            $clientRouteInfo = $clientRouteInfo->where('hotels.name',null);
+        $clientRouteInfo = $clientRouteInfo->get();
+        $clientRouteInfo = $clientRouteInfo->sortby('id')->sortby('hour')->sortby('weekOfYear')->values()->toArray();
+        return $clientRouteInfo;
+
     }
 
     /**
@@ -3790,6 +3813,8 @@ class CrmRouteController extends Controller
             ->ActiveCampaigns($onlyIds)
             ->get();
 
+        $allClientRouteInfoRecords = ClientRouteInfo::all();
+
         //create new collection and setting properites by client_route_id
         $ClientRouteCampaignsGroupedByClientRoutes = collect();
         foreach($onlyIds as $ids) {
@@ -3805,16 +3830,21 @@ class CrmRouteController extends Controller
                 $numberOfHours = $oneCampaign->hour_count; // number of hours in campaign
 
                 //this procedure assign property "onlyOne" which indices whether campaign is single show
-                for($hourCount = 0; $hourCount < $numberOfHours; $hourCount++) {
-                    $rec = ClientRouteInfo::where('id', '=', $basicId + $hourCount)->first();
-                    if($numberOfHours == 1) {
-                        $rec->onlyOne = 1;
+                    $infoRecord = ClientRouteInfo::where('id', '=', $basicId)->first();
+                    $showOrder = $infoRecord->show_order;
+                    $clientRouteId = $infoRecord->client_route_id;
+                    $date = $infoRecord->date;
+
+                    $allRecordsForUpdate = ClientRouteInfo::where('client_route_id', '=', $clientRouteId)->where('date', '=', $date)->where('show_order', '=', $showOrder)->get();
+                    foreach($allRecordsForUpdate as $recToUpd) {
+                        if($numberOfHours == 1) {
+                            $recToUpd->onlyOne = 1;
+                        }
+                        else {
+                            $recToUpd->onlyOne = 0;
+                        }
+                        array_push($arrayOfInfo, $recToUpd);
                     }
-                    else {
-                        $rec->onlyOne = 0;
-                    }
-                    array_push($arrayOfInfo, $rec);
-                }
             }
             $ClientRouteCampaignsGroupedByClientRoutes[$key] = collect($arrayOfInfo);
         }
@@ -3849,8 +3879,8 @@ class CrmRouteController extends Controller
                 }
 
                 $recGroupedByShowOrder = $singleDateGroup->groupBy('show_order');
-
                 foreach($recGroupedByShowOrder as $orderedShow) {
+
 
                     //here we assign limits according to different scenario
                     foreach($orderedShow as $singleItem) {

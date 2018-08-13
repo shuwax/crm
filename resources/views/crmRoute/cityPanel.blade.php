@@ -88,9 +88,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="alert alert-info">
-                                Jeśli miasto ma nie mieć karencji, należy wpisać <strong>-1</strong>
-                                <br>
-                                Jeśli miasto ma mieć nielimitowaną liczbę pokazów w miesiącu, należy wpisać <strong>-1</strong>.
+                                Jeśli miasto ma nie mieć karencji, należy wpisać <strong>-1</strong> w polu <i>Karencja</i>
                                 <br>
                                 Szerokość i długość geograficzną należy wpisać w formacie <code>xx.xxxxxx</code> (sześć miejsc po kropce).
                             </div>
@@ -171,13 +169,8 @@
                                            placeholder="np: 19.303840" type="number">
                                 </div>
                             </div>
-                            {{--<div class="col-md-3">--}}
-                                {{--<div class="form-group">--}}
-                                    {{--<label class="myLabel">Max pokazów tygodniowo</label>--}}
-                                    {{--<input class="form-control" id="weekGrace" name="weekGrace" placeholder="Maksymalna ilość pokazów tygodniowo"--}}
-                                           {{--type="number" min="0" step="1" disabled>--}}
-                                {{--</div>--}}
-                            {{--</div>--}}
+
+
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="myLabel">Max pokazów w miesiącu</label>
@@ -314,7 +307,7 @@
                 validation = false;
                 swal("Podaj prawdiłową liczbę karencji")
             }
-            if (!isNumber(eventCount)) {
+            if (!isNumber(eventCount) || eventCount < 1) {
                 validation = false;
                 swal("Podaj prawdiłową liczbę godzin pokazu")
             }

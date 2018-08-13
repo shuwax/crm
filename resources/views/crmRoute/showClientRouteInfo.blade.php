@@ -7,6 +7,7 @@
 @extends('layouts.main')
 @section('style')
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+    <link href="{{ asset('/css//buttons.dataTables.min.css')}}" rel="stylesheet">
     <style>
         #fullscreen {
             margin-top: 1.75em;
@@ -28,6 +29,12 @@
         </div>
 
             <div class="row">
+                <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="showWithoutHotel">Pokazy bez hoteli</label>
+                            <input type="checkbox" style="display:inline-block" id="showWithoutHotel">
+                        </div>
+                </div>
                 <div class="col-md-3">
                     <label for="date_start">Data początkowa:</label>
                     <input type="date" id="date_start" style="width: 100%;" class="form-control">
@@ -78,6 +85,9 @@
 @section('script')
     <script src="{{ asset('/js/dataTables.bootstrap.min.js')}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script src="{{ asset('/js/dataTables.buttons.min.js')}}"></script>
+    <script src="{{ asset('/js/jszip.min.js')}}"></script>
+    <script src="{{ asset('/js/buttons.html5.min.js')}}"></script>
 
     <script>
         let datatableHeight = '45vh'; //this variable defines height of table
@@ -89,7 +99,7 @@
         const month = ("0" + (now.getMonth() + 1)).slice(-2);
         const today = now.getFullYear() + "-" + (month) + "-" + (day);
         const firstDayOfThisMonth = now.getFullYear() + "-" + (month) + "-01";
-
+        const showWithoutHotelInput = $('#showWithoutHotel');
         /*Activation selectpicker and datetimepicker framework*/
         (function initial() {
             $('.selectpicker').selectpicker({
@@ -102,44 +112,74 @@
 
         })();
 
-        let table = $('#datatable').DataTable({
-            autoWidth: true,
-            processing: true,
-            serverSide: true,
-            scrollY: datatableHeight,
-            ajax: {
+        function ajaxResponde() {
+            var tmp = null;
+            $.ajax({
                 url: "{{route('api.datatableClientRouteInfoAjax')}}",
                 type: 'POST',
-                data: function (d) {
-                    d.dateStop = $('#date_stop').val();
-                    d.dateStart = $('#date_start').val();
-                    d.clients = $('#clients').val();
+                'async': false,
+                data: {
+                    'dateStop': $('#date_stop').val(),
+                    'dateStart': $('#date_start').val(),
+                    'clients': $('#clients').val(),
+                    'showWithoutHotelInput': showWithoutHotelInput.prop('checked')
                 },
-                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}
-            },
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                success: function (response) {
+                    console.log(response);
+                    tmp =  response;
+                }
+            });
+            return tmp;
+        };
+        let table = $('#datatable').DataTable({
+            autoWidth: true,
+            dom: 'Bfrtip',
+            buttons: [
+                'excel'
+            ],
+            scrollY: datatableHeight,
+            data: ajaxResponde(),
+            {{--ajax: {--}}
+                {{--url: "{{route('api.datatableClientRouteInfoAjax')}}",--}}
+                {{--type: 'POST',--}}
+                {{--data: function (d) {--}}
+                    {{--d.dateStop = $('#date_stop').val();--}}
+                    {{--d.dateStart = $('#date_start').val();--}}
+                    {{--d.clients = $('#clients').val();--}}
+                    {{--d.showWithoutHotelInput = showWithoutHotelInput.prop('checked');--}}
+                {{--},--}}
+                {{--headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}--}}
+            {{--},--}}
             language: {
                 url: "//cdn.datatables.net/plug-ins/1.10.16/i18n/Polish.json"
             },
             columns:[
-                {data: 'clientName'},
-                {data: 'weekOfYear'},
-                {data: 'date'},
-                {data: 'cityName'},
-                {data: 'hotelName'},
-                {data: 'userReservation'},
-                {data: 'hotelPrice'}
+                {data: 'clientName','orderable':false},
+                {data: 'weekOfYear','orderable':false},
+                {data: 'date','orderable':false},
+                {data: 'cityName','orderable':false},
+                {data: 'hotelName','orderable':false},
+                {data: 'userReservation','orderable':false},
+                {data: 'hotelPrice','orderable':false}
             ]
         });
 
         $('#menu-toggle').change(()=>{
             table.columns.adjust().draw();
         });
-
+        showWithoutHotelInput.change(function(e){
+            table.clear().draw();
+            table.rows.add(ajaxResponde());
+            table.columns.adjust().draw();
+        });
         /**
          * This event listener reloads table after changing start or stop date
          */
         $('#date_start, #date_stop, #clients').on('change', function(e) {
-            table.ajax.reload();
+            table.clear().draw();
+            table.rows.add(ajaxResponde());
+            table.columns.adjust().draw();
         });
 
         /**
