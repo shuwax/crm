@@ -150,7 +150,7 @@ class StatisticsRBHController extends Controller
             ->with('SfirstDate',$SfirstDate)
             ->with('SlastDate',$SlastDate)
             ->with('SactualWeekNumber',$SactualWeekNumber)
-            ->with('columnSum',$objectOfSumColumns);;
+            ->with('columnSum',$objectOfSumColumns);
     }
 
     /**
