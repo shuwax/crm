@@ -97,7 +97,7 @@ class TestORM extends Controller
                                 $spreadsheet_data[$lp][$header_array[$i]] = utf8_encode($item);
                             }
                             $spreadsheet_data[$lp]['user_id'] = 1364;
-                            $spreadsheet_data[$lp]['hour'] = date('H').":00:00";
+                            $spreadsheet_data[$lp]['hour'] = date('H:i:sa');
                             $spreadsheet_data[$lp]['report_date'] = date('Y-m-d');
                             $spreadsheet_data[$lp]['is_send'] = 0;
 
