@@ -32,32 +32,12 @@ class StatisticsController extends Controller
         $date = date('Y-m-d');
         $hour = date('H') . ':00:00'; //tutaj zmienic przy wydawaniu na produkcję na  date('H') - 1
 
-        $max_ids = DB::table('hour_report')
-            ->select(DB::raw('
-                    MAX(id) as id
-                '))
-            ->where('report_date', '=', $date);
-
         $reports = HourReport::where('report_date', '=', $date)
-            ->where('hour', '>=', $hour)
-            ->whereIn('id', function($query) {
-                $query->select(DB::raw(
-                    'MAX(hour_report.id)'
-                ))
-                    ->from('hour_report')
-                    ->where('call_time', '!=',0)
-                    ->groupBy('department_info_id','report_date');
-            })
+            ->where('hour', $hour)
             ->get();
-
-        $hourMinus12Min = date('H:i:sa', strtotime('-12 minutes'));
-        $hourMinus8Min = date('H:i:sa', strtotime('-8 minutes'));
-
         $last_reports = HourReport::where('report_date', '=', $date)
-            ->whereBetween('hour', [$hourMinus12Min, $hourMinus8Min])
+            ->where('hour', date('H')-1 . ':00:00')
             ->get();
-
-//        dd($last_reports);
 
         $data = [
             'hour' => $hour,
@@ -67,8 +47,6 @@ class StatisticsController extends Controller
         ];
         return $data;
     }
-
-
 
 // Mail do raportu godzinnego telemarketing
     public function MailhourReportTelemarketing() {
