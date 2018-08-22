@@ -38,11 +38,8 @@ class StatisticsController extends Controller
                 '))
             ->where('report_date', '=', $date);
 
-        //co sie stanie gdy nie ma max_ids
-
         $reports = HourReport::where('report_date', '=', $date)
             ->where('hour', '>=', $hour)
-//            ->whereIn('id', $max_ids->pluck('id')->toArray())
             ->whereIn('id', function($query) {
                 $query->select(DB::raw(
                     'MAX(hour_report.id)'
@@ -53,9 +50,14 @@ class StatisticsController extends Controller
             })
             ->get();
 
+        $hourMinus12Min = date('H:i:sa', strtotime('-12 minutes'));
+        $hourMinus8Min = date('H:i:sa', strtotime('-8 minutes'));
+
         $last_reports = HourReport::where('report_date', '=', $date)
-            ->where('hour', date('H')-1 . ':00:00')
+            ->whereBetween('hour', [$hourMinus12Min, $hourMinus8Min])
             ->get();
+
+//        dd($last_reports);
 
         $data = [
             'hour' => $hour,
