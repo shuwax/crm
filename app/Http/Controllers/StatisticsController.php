@@ -42,7 +42,15 @@ class StatisticsController extends Controller
 
         $reports = HourReport::where('report_date', '=', $date)
             ->where('hour', '>=', $hour)
-            ->whereIn('id', $max_ids->pluck('id')->toArray())
+//            ->whereIn('id', $max_ids->pluck('id')->toArray())
+            ->whereIn('id', function($query) {
+                $query->select(DB::raw(
+                    'MAX(hour_report.id)'
+                ))
+                    ->from('hour_report')
+                    ->where('call_time', '!=',0)
+                    ->groupBy('department_info_id','report_date');
+            })
             ->get();
 
         $last_reports = HourReport::where('report_date', '=', $date)
