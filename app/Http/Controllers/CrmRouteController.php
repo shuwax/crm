@@ -3887,7 +3887,7 @@ class CrmRouteController extends Controller
                 $message->from($mailFrom, 'Verona Consulting');
                 $message->cc($mailFrom, 'Verona Consulting');
             }
-            $message->cc('skobry123on@gmail.com', 'Verona Consulting');
+            $message->cc('pawel.zielinski@veronaconsulting.pl', 'Paweł Zieliński');
             foreach($accepted_users as $user) {
                 if (filter_var($user->username, FILTER_VALIDATE_EMAIL)) {
                     $message->to($user->username, $user->first_name . ' ' . $user->last_name)->subject($mail_title);
