@@ -59,6 +59,10 @@ class Department_info extends Model
         return $this->belongsTo('App\User', 'director_id');
     }
 
+    public function accepted_payment_user_story() {
+        return $this->hasMany('App\AcceptedPaymentUserStory', 'department_info_id');
+    }
+
     public static function getAllInfoAboutDepartment(){
         $departments = Department_info::all();
         $departments->map(function ($item){

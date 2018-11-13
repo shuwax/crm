@@ -520,14 +520,34 @@ class UsersController extends Controller
                     } else { // user has no history in user_employment_status
                         $userEmployment2 = new UserEmploymentStatus();
                         if ($request->login_phone == 0) {
-                                $userEmployment2->pbx_id = $user->login_phone;
+                            $userEmployment2->pbx_id = $user->login_phone;
                         } else {
                             $userEmployment2->pbx_id = $request->login_phone;
                         }
+                        if($user->login_phone !== null) {
+                            $userEmploymentStatusOfAnotherUserPbxId = UserEmploymentStatus::where('pbx_id', $user->login_phone)->where('user_id','<>', $user->id)->orderBy('id','desc')->first();
+                            if(empty($userEmploymentStatusOfAnotherUserPbxId)){
+                                $userEmployment2->pbx_id_add_date = $user->start_work;
+                            }else{
+                                $userWithSamePbxIdStillWorking = User::where('id',$userEmploymentStatusOfAnotherUserPbxId->user_id)->where('status_work',1)->first();
+                                if(empty($userWithSamePbxIdStillWorking)){
+                                    if($userEmploymentStatusOfAnotherUserPbxId->pbx_id_remove_date == null || $userEmploymentStatusOfAnotherUserPbxId->pbx_id_remove_date == '0000-00-00'){
+                                        $userEmploymentStatusOfAnotherUserPbxId->pbx_id_remove_date = $user->start_work;
+                                        $userEmploymentStatusOfAnotherUserPbxId->save();
+                                        $userEmployment2->pbx_id_add_date = $user->start_work;
+                                    }else{
+                                        $userEmployment2->pbx_id_add_date = $userEmploymentStatusOfAnotherUserPbxId->pbx_id_remove_date;
+                                    }
+                                }else{
+                                    $userEmployment2->pbx_id_add_date = $user->stop_date;
+                                }
+                            }
+                        }else{
+                            $userEmployment2->pbx_id_add_date = $user->stop_date;
+                        }
                         $user->login_phone = null;
-                        $userEmployment2->user_id = $user->id;
-                        $userEmployment2->pbx_id_add_date = $request->stop_date;
                         $userEmployment2->pbx_id_remove_date = $request->stop_date;
+                        $userEmployment2->user_id = $user->id;
                         $userEmployment2->save();
                     }
                 }

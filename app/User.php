@@ -90,6 +90,9 @@ class User extends Authenticatable
     public function equipments() {
         return $this->hasMany('App\Equipments', 'id_user');
     }
+    public function accepted_payment_user_story() {
+        return $this->hasMany('App\AcceptedPaymentUserStory', 'user_id');
+    }
 
     public function notifications() {
         return $this->hasMany('App\Notifications', 'user_id');

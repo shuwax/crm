@@ -16,6 +16,11 @@
             /*table-layout: fixed;*/
             /*word-break: break-all;*/
         }
+
+        .bonusInfoSign:hover{
+            cursor: pointer;
+            color: #5bc0de;
+        }
     </style>
 @endsection
 @section('content')
@@ -237,7 +242,7 @@
                                                                                 {{--<td>{{($janky_proc)}} %</td>--}}
                                                                                 {{--<td>{{($janky_cost*(-1))}} PLN</td>--}}
                                                                                 <td>{{($standart_salary)}}</td>
-                                                                                <td>{{($bonus_penalty)}}</td>
+                                                                                <td>{{($bonus_penalty)}}@if(count($item2->bonuses)>0) <span class="glyphicon glyphicon-info-sign bonusInfoSign" onclick="showBonuses('{{$item2->bonuses}}')"></span>@endif</td>
                                                                                 <td>{{($student)}}</td>
                                                                                 <td>{{($documents)}}</td>
                                                                                 <td>{{(($item2->salary_to_account == 0) ? "Nie" : "Tak")}}</td>
@@ -284,7 +289,21 @@
         </div>
     </div>
 
-
+<div class="modal" id="modalBonuses" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">{{--
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>--}}
+                <h4 class="modal-title">Szczegóły premii</h4>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Zamknij</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 @endsection
 
 @section('script')
@@ -318,7 +337,7 @@
      @endif
 @endif
 <script>
-
+    let modalBonuses  =  $('#modalBonuses');
     $(document).ready(function() {
         $('#accept_payment').on('click',function (e) {
             swal({
@@ -540,13 +559,80 @@
             "paging": false,
             "bInfo": false,
         });
-
         // Ukrycie klawisza pozwalającego wygenerować wypłatę w csv
         var payment_saved = '{{$payment_saved_pom}}';
         if(payment_saved == 0){
             $(".buttons-html5").css('display','none');
         }
     });
+
+
+    function showBonuses(bonuses){
+        console.log(bonuses);
+        bonuses = JSON.parse(bonuses);
+        let modalBonusesBody = modalBonuses.find('.modal-body');
+        modalBonusesBody.empty();
+        let thead = $('<thead>').append(
+            $('<tr>')
+                .append($('<th>').append('Data'))
+                .append($('<th>').append('Kara/premia'))
+                .append($('<th>').append('Dodał'))
+                .append($('<th>').append('Powód'))
+        );
+        let tbody =$('<tbody>');
+        $.each(bonuses, function (index, bonus) {
+            tbody.append($('<tr>')
+                .append($('<td>').append(bonus.event_date))
+                .append($('<td>').append(function (){
+                    let div = $('<div>');
+                    if(bonus.type === 1){
+                        div.css({'background-color': '#ff7b7b',
+                            'padding':'4px 10px',
+                            'border-radius': '5px',
+                            'border':'1px solid #ff6a6a',
+                            'color':'#7f2222',
+                            'text-align':'center'
+                        }).append('Kara: ');
+                    }else{
+                        div.css({'background-color': '#70ff5c',
+                            'padding':'4px 10px',
+                            'border-radius': '5px',
+                            'border':'1px solid #33ff36',
+                            'color':'#4b5c44',
+                            'text-align':'center'
+                        }).append('Premia: ');
+                    }
+                    div.append(bonus.amount);
+                    return div;
+                }))
+                .append($('<td>').append(function (){
+                    let div = $('<div>');
+                    div.css({'background-color': '#d9edf7',
+                        'padding':'4px 10px',
+                        'border-radius': '5px',
+                        'border':'1px solid #bce8f1',
+                        'color':'#31708f',
+                        'text-align':'center'
+                    }).append(bonus.manager);
+                    return div;
+                }))
+                .append($('<td>').append(bonus.comment))
+            )
+        });
+        let table = $('<table>').addClass('table display datatable')
+            .css({'width':'100%'}).append(thead).append(tbody);
+        modalBonusesBody.append(table);
+        modalBonuses.modal('show');
+        let datatable = table.DataTable({
+            paging:false,
+            scrollY:true,
+            height: '65vh',
+            scrollCollapse: true
+        });
+        modalBonuses.on('shown.bs.modal', function () {
+            datatable.columns.adjust().draw();
+        });
+    }
 
 
 

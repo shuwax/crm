@@ -24,4 +24,8 @@ class UserTypes extends Model
     public function employee_of_the_week() {
         return $this->hasMany('App\EmployeeOfTheWeek', 'user_type_id');
     }
+
+    public function accepted_payment_user_story() {
+        return $this->hasMany('App\AcceptedPaymentUserStory', 'user_type_id');
+    }
 }

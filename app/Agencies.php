@@ -21,4 +21,8 @@ class Agencies extends Model
     public function users() {
         return $this->hasMany('App\User', 'agency_id');
     }
+
+    public function accepted_payment_user_story() {
+        return $this->hasMany('App\AcceptedPaymentUserStory', 'agency_id');
+    }
 }

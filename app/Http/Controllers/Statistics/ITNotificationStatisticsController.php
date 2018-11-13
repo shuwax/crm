@@ -49,7 +49,8 @@ class ITNotificationStatisticsController
                             });
                     })
                     ->orWhere(function ($query){
-                        $query->whereNull('data_stop');
+                        $query->whereNull('data_stop')
+                        ->where('status','<>',0);
                     });
             })
             ->get();
